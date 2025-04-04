@@ -1,0 +1,85 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+<!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Image Generator</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
+    <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"/>
+
+    <!-- Template styles -->
+    <link href="taskpane.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="ms-font-m ms-Fabric">
+    <!-- Notification element -->
+    <div id="notification" class="notification"></div>
+
+    <header class="ms-welcome__header">
+        <h1>AI Image Generator</h1>
+        <p>Transform your ideas into stunning visuals instantly</p>
+    </header>
+    
+    <main id="app-body" class="ms-welcome__main">
+        <!-- Add loader -->
+        <div id="loader" class="loader-container">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Generating your image...</div>
+            <button id="cancel-generation" class="ms-Button ms-Button--danger">
+                <span class="ms-Button-label">Cancel Generation</span>
+            </button>
+        </div>
+
+        <!-- Add Dropdown Section -->
+        <div class="dropdown-wrapper">
+            <label for="image-purpose-select" class="ms-Label">Select image purpose</label>
+            <select id="image-purpose-select" class="dropdown-field">
+                <option value="" disabled selected>--Please choose an option--</option>
+                <option value="social-media-posts">Social Media Posts</option>
+                <option value="marketing-advertising">Marketing & Advertising</option>
+                <option value="ecommerce-product-photos">E-commerce Product Photos</option>
+                <option value="website-design">Website Design</option>
+                <option value="blog-article-images">Blog & Article Images</option>
+                <option value="presentation-graphics">Presentation Graphics</option>
+                <option value="digital-art-illustrations">Digital Art & Illustrations</option>
+                <option value="book-covers">Book Covers</option>
+                <option value="logo-design">Logo Design</option>
+                <option value="business-cards">Business Cards</option>
+                <option value="brochures-flyers">Brochures & Flyers</option>
+                <option value="email-marketing">Email Marketing</option>
+                <option value="youtube-thumbnails">YouTube Thumbnails</option>
+                <option value="instagram-stories">Instagram Stories</option>
+                <option value="facebook-ads">Facebook Ads</option>
+                <option value="linkedin-posts">LinkedIn Posts</option>
+                <option value="twitter-headers">Twitter Headers</option>
+                <option value="podcast-cover-art">Podcast Cover Art</option>
+                <option value="event-banners">Event Banners</option>
+                <option value="educational-content">Educational Content</option>
+            </select>
+        </div>
+
+        <div class="input-wrapper">
+            <textarea class="input-field" placeholder="Enter your prompt here" rows="4"></textarea>
+            <button class="enhance-button">Enhance</button>
+        </div>
+        
+        <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero">
+            <span class="ms-Button-label">Generate Image</span>
+        </div>
+    </main>
+
+    <section id="sideload-msg" class="ms-welcome__main">
+        <h2 class="ms-font-xl">Please <a target="_blank" href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing">sideload</a> your add-in to see app body.</h2>
+    </section>
+</body>
+
+</html>

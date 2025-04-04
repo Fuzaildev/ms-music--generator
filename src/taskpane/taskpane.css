@@ -1,0 +1,364 @@
+/* 
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+ html,
+ body {
+     width: 100%;
+     height: 100%;
+     margin: 0;
+     padding: 0;
+     font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+     background: #FFFFFF; 
+     /* Ensure default text color is dark */
+     color: #323130; 
+     /* Ensure body fills height for flex alignment */
+     display: flex;
+     flex-direction: column;
+ }
+ 
+ ul {
+     margin: 0;
+     padding: 0;
+ }
+ 
+ .ms-welcome__header {
+    padding: 20px 24px; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: transparent;
+    /* Lighten border or remove if background is white */
+    border-bottom: 1px solid #F3F4F6; 
+    /* Keep consistent bottom margin */
+    margin-bottom: 20px; 
+ }
+
+ .ms-welcome__header h1 {
+    /* Slightly smaller, standard weight */
+    font-size: 28px; 
+    line-height: 1.2;
+    font-weight: 600; /* Semibold */
+    color: #1f4e7a; /* Use a Fluent UI theme color */
+    margin: 0 0 8px 0;
+    text-align: left;
+    max-width: 100%; /* Allow full width */
+ }
+
+ .ms-welcome__header p {
+    font-size: 14px; 
+    line-height: 1.5;
+    color: #605E5C; 
+    margin: 0;
+    text-align: left;
+    max-width: 100%;
+    /* Add a little space above the paragraph */
+    margin-top: 4px;
+ }
+
+ .ms-welcome__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 0 0;
+    padding: 0 24px 24px 24px; /* Add bottom padding */
+    width: 100%;
+    box-sizing: border-box;
+ }
+
+ .input-wrapper {
+    width: 100%;
+    position: relative;
+    margin-bottom: 16px;
+ }
+
+ /* Combined styles for textarea and input */
+ .input-field {
+    width: 100%;
+    /* Adjusted padding */
+    padding: 8px 12px; 
+    font-size: 14px;
+    /* Standard Fluent UI input border */
+    border: 1px solid #C8C6C4; 
+    /* Subtle border radius */
+    border-radius: 2px; 
+    background: #FFFFFF;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: none; 
+ }
+ 
+ /* Specific style for textarea */
+ textarea.input-field {
+    /* Ensure consistent line height */
+    line-height: 1.5;
+    /* Allow vertical resize, prevent horizontal */
+    resize: vertical;
+    min-height: 60px; /* Minimum height */
+ }
+ 
+ .input-field:focus {
+    outline: none;
+    /* Fluent UI focus border color */
+    border-color: #0078D4; 
+    /* Remove box-shadow, rely on border */
+    box-shadow: none; 
+ }
+ 
+ .enhance-button {
+    position: absolute;
+    right: 4px;
+    /* Position relative to the top of the textarea */
+    top: 4px; 
+    transform: none; /* Remove vertical centering */
+    background: #FFFFFF;
+    border: 1px solid #C8C6C4; 
+    border-radius: 2px;
+    padding: 4px 8px;
+    color: #323130;
+    font-size: 12px;
+    font-weight: 400; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+ }
+
+ .enhance-button:hover {
+    background: #F3F4F6;
+    border-color: #A19F9D; /* Darker neutral border on hover */
+ }
+ 
+ .ms-welcome__action.ms-Button--hero {
+    width: 100%;
+    padding: 8px 12px; 
+    border-radius: 2px; 
+    background: #0078D4; 
+    border: 1px solid #0078D4; 
+    transition: all 0.2s ease;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    /* Ensure consistent spacing */
+    margin-top: 16px; 
+ }
+
+.ms-Button.ms-Button--hero .ms-Button-label {
+    color: white;
+    /* Standard button text size */
+    font-weight: 600; /* Semibold */
+    font-size: 14px; 
+    line-height: 1;
+}
+
+.ms-Button.ms-Button--hero:hover {
+    /* Standard Fluent UI hover blue */
+    background: #005A9E; 
+    border-color: #005A9E;
+    /* Remove transform/shadow for standard feel */
+    transform: none; 
+    box-shadow: none; 
+}
+
+.ms-Button.ms-Button--hero.disabled {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ms-Button.ms-Button--hero.disabled:hover {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+}
+
+.ms-Button.ms-Button--hero.disabled .ms-Button-label {
+    color: #A19F9D;
+}
+
+#sideload-msg {
+    display: none;
+}
+
+.ms-welcome__features {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.ms-welcome__features.ms-List .ms-ListItem {
+    /* Use lighter background, subtle border */
+    background: #F3F4F6; 
+    border-radius: 2px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #EDEBE9;
+    /* Remove box-shadow for flatter look */
+    box-shadow: none; 
+}
+
+b {
+    font-weight: 600; /* Semibold is standard */
+    color: #323130; /* Standard text */
+}
+/* Styles for the dropdown */
+.dropdown-wrapper {
+   width: 100%;
+   margin-bottom: 16px; 
+}
+
+.dropdown-wrapper .ms-Label {
+   display: block; /* Ensure label is on its own line */
+   margin-bottom: 4px; /* Space between label and select */
+   font-size: 14px;
+   /* Change font-weight to regular */
+   font-weight: 400; 
+   color: #323130; /* Standard text */
+}
+
+.dropdown-field {
+   width: 100%;
+   padding: 8px 12px; /* Match input field */
+   font-size: 14px;
+   /* Change border color to match the button/focus blue */
+   border: 1px solid #0078D4; 
+   border-radius: 8px; /* Rounded corners as per image */
+   background: #FFFFFF;
+   box-sizing: border-box;
+   transition: all 0.2s ease;
+   appearance: none; /* Remove default browser styling */
+   /* Add custom arrow */
+   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23605E5C"><path d="M8 11.314 3.686 7h8.628L8 11.314z"/></svg>');
+   background-repeat: no-repeat;
+   background-position: right 8px center;
+   background-size: 10px;
+   padding-right: 30px; /* Make space for the arrow */
+   /* Ensure dropdown text is dark */
+   color: #323130;
+}
+
+.dropdown-field:focus {
+   outline: none;
+   border-color: #0078D4; /* Match input field focus */
+}
+
+/* Style for placeholder text in textarea */
+textarea.input-field::placeholder {
+    color: #605E5C; /* Use a slightly lighter dark gray for placeholders */
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+    max-width: 80%;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notification.error {
+    background-color: #FDE7E9;
+    color: #D13438;
+    border: 1px solid #F1707B;
+}
+
+.notification.success {
+    background-color: #DFF6DD;
+    color: #107C10;
+    border: 1px solid #9AD29A;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Remove unused styles */
+.ms-Button.ms-Button--credits,
+.ms-Button.ms-Button--credits:hover,
+.ms-Button.ms-Button--credits:active,
+.ms-Button.ms-Button--credits .ms-Button-label,
+.tokens-container,
+.token-count,
+#token-number,
+#token-number.premium {
+    display: none;
+}
+
+/* Loader styles */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.loader-container.active {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0078D4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loader-text {
+    color: #323130;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* Cancel button styles */
+.ms-Button.ms-Button--danger {
+    background: #D13438;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ms-Button.ms-Button--danger:hover {
+    background: #A4262C;
+}
+
+.ms-Button.ms-Button--danger:active {
+    background: #751D1F;
+}
+
+.ms-Button.ms-Button--danger .ms-Button-label {
+    color: white;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
