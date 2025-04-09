@@ -87,6 +87,35 @@
         <div id="loader" class="loader-container">
             <div class="loader-spinner"></div>
             <div class="loader-text">Generating your image...</div>
+            <div id="auth-loading-content" class="auth-loading-content">
+                <div class="auth-loading-step active" data-step="1">
+                    <h3>Connecting to authentication server...</h3>
+                    <p>Establishing a secure connection to verify your identity.</p>
+                </div>
+                <div class="auth-loading-step" data-step="2">
+                    <h3>Preparing your session...</h3>
+                    <p>Setting up your personalized workspace with all your preferences.</p>
+                </div>
+                <div class="auth-loading-step" data-step="3">
+                    <h3>Almost there!</h3>
+                    <p>Just a few more seconds to complete the authentication process.</p>
+                </div>
+                <div class="auth-loading-step" data-step="4">
+                    <h3>Finalizing your login...</h3>
+                    <p>We're making sure everything is secure and ready for you.</p>
+                </div>
+                <div class="auth-loading-step" data-step="5">
+                    <h3>Just a moment more...</h3>
+                    <p>We're almost done setting up your account.</p>
+                </div>
+                <div class="auth-progress">
+                    <div class="auth-progress-dot active" data-step="1"></div>
+                    <div class="auth-progress-dot" data-step="2"></div>
+                    <div class="auth-progress-dot" data-step="3"></div>
+                    <div class="auth-progress-dot" data-step="4"></div>
+                    <div class="auth-progress-dot" data-step="5"></div>
+                </div>
+            </div>
             <button id="cancel-generation" class="ms-Button ms-Button--danger">
                 <span class="ms-Button-label">Cancel Generation</span>
             </button>

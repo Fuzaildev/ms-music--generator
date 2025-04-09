@@ -208,6 +208,7 @@ function showLoader(message = "Generating your image...", isGenerating = true) {
   const loader = document.getElementById("loader");
   const loaderText = loader.querySelector(".loader-text");
   const cancelButton = document.getElementById("cancel-generation");
+  const authLoadingContent = document.getElementById("auth-loading-content");
   
   loaderText.textContent = message;
   loader.classList.add("active");
@@ -217,14 +218,91 @@ function showLoader(message = "Generating your image...", isGenerating = true) {
     cancelButton.querySelector(".ms-Button-label").textContent = isGenerating ? "Cancel Generation" : "Cancel";
     cancelButton.onclick = isGenerating ? cancelGeneration : cancelAuthentication;
   }
+  
+  // Handle authentication loading experience
+  if (!isGenerating && message.includes("Authenticating")) {
+    // Show the auth loading content
+    authLoadingContent.style.display = "block";
+    loaderText.style.display = "none";
+    
+    // Start the animated loading steps
+    startAuthLoadingAnimation();
+  } else {
+    // Hide the auth loading content for other operations
+    authLoadingContent.style.display = "none";
+    loaderText.style.display = "block";
+  }
 }
 
-// Handle logout
-function handleLogout() {
-  console.log("Logout button clicked");
-  authManager.logout();
-  updateAuthUI(false);
-  showSuccess("Logged out successfully");
+// Function to animate the authentication loading steps
+function startAuthLoadingAnimation() {
+  const steps = document.querySelectorAll('.auth-loading-step');
+  const dots = document.querySelectorAll('.auth-progress-dot');
+  let currentStep = 0;
+  
+  // Clear any existing interval
+  if (window.authLoadingInterval) {
+    clearInterval(window.authLoadingInterval);
+  }
+  
+  // Function to update the active step
+  function updateActiveStep() {
+    // Remove active class from all steps and dots
+    steps.forEach(step => step.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    // Add active class to current step and dot
+    if (currentStep < steps.length) {
+      steps[currentStep].classList.add('active');
+      dots[currentStep].classList.add('active');
+      currentStep++;
+    } else {
+      // If we've gone through all steps, start over
+      currentStep = 0;
+      steps[currentStep].classList.add('active');
+      dots[currentStep].classList.add('active');
+    }
+  }
+  
+  // Set initial active step
+  updateActiveStep();
+  
+  // Set interval to change steps every 6-7 seconds (for 30-35 second total auth time)
+  window.authLoadingInterval = setInterval(updateActiveStep, 6500);
+}
+
+// Update hideLoader function to clean up auth loading animation
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  const authLoadingContent = document.getElementById("auth-loading-content");
+  
+  loader.classList.remove("active");
+  
+  // Reset auth loading content
+  if (authLoadingContent) {
+    authLoadingContent.style.display = "none";
+    
+    // Reset all steps
+    const steps = document.querySelectorAll('.auth-loading-step');
+    steps.forEach(step => step.classList.remove('active'));
+    steps[0].classList.add('active');
+  }
+  
+  // Clear any existing interval
+  if (window.authLoadingInterval) {
+    clearInterval(window.authLoadingInterval);
+    window.authLoadingInterval = null;
+  }
+  
+  // Reset the cancel button to default state
+  const cancelButton = document.getElementById("cancel-generation");
+  if (cancelButton) {
+    cancelButton.querySelector(".ms-Button-label").textContent = "Cancel Generation";
+    cancelButton.onclick = cancelGeneration;
+  }
+  
+  // Reset the current controller when hiding loader
+  currentGenerationController = null;
 }
 
 // Add variable to track the current generation request
@@ -367,21 +445,6 @@ async function checkTokens() {
     generateButton.classList.add('disabled');
     generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Tokens";
   }
-}
-
-function hideLoader() {
-  const loader = document.getElementById("loader");
-  loader.classList.remove("active");
-  
-  // Reset the cancel button to default state
-  const cancelButton = document.getElementById("cancel-generation");
-  if (cancelButton) {
-    cancelButton.querySelector(".ms-Button-label").textContent = "Cancel Generation";
-    cancelButton.onclick = cancelGeneration;
-  }
-  
-  // Reset the current controller when hiding loader
-  currentGenerationController = null;
 }
 
 // Add cancel generation function
@@ -830,4 +893,12 @@ function showError(message) {
 
 function showSuccess(message) {
   showNotification(message, "success");
+}
+
+// Handle logout
+function handleLogout() {
+  console.log("Logout button clicked");
+  authManager.logout();
+  updateAuthUI(false);
+  showSuccess("Logged out successfully");
 }

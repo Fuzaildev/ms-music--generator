@@ -428,3 +428,77 @@ textarea.input-field::placeholder {
 #logoutButton {
     display: none; /* Hide by default, JS will show it */
 }
+
+/* Enhanced authentication loading styles */
+.auth-loading-content {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 16px;
+    text-align: center;
+    display: none; /* Hidden by default, shown only during auth */
+}
+
+.auth-loading-step {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.auth-loading-step.active {
+    display: block;
+    opacity: 1;
+}
+
+.auth-loading-step h3 {
+    color: #0078D4;
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.auth-loading-step p {
+    color: #605E5C;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* Progress indicator for auth steps */
+.auth-progress {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+.auth-progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #E1DFDD;
+    margin: 0 5px;
+    transition: background-color 0.3s ease;
+}
+
+.auth-progress-dot.active {
+    background-color: #0078D4;
+}
+
+/* Animation for the spinner during auth */
+.loader-container.active .loader-spinner {
+    border-top-color: #0078D4;
+    border-right-color: #0078D4;
+    border-bottom-color: #0078D4;
+    border-left-color: #0078D4;
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-top-color: rgba(0, 120, 212, 0.2);
+    border-right-color: rgba(0, 120, 212, 0.2);
+    border-bottom-color: rgba(0, 120, 212, 0.2);
+    border-left-color: #0078D4;
+    animation: spin 1s linear infinite;
+}
