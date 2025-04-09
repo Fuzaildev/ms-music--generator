@@ -390,3 +390,41 @@ textarea.input-field::placeholder {
 #loginButton, #logoutButton {
     margin: 5px;
 }
+
+/* --- Auth Section Styles --- */
+.auth-section {
+    display: flex;
+    flex-direction: column; /* Stack status and buttons */
+    align-items: center;    /* Center align items */
+    width: 100%;
+    padding: 16px;
+    margin-top: 20px;       /* Add space above the section */
+    border: 1px solid #EDEBE9; /* Subtle border */
+    border-radius: 4px;
+    background-color: #F9F9F9; /* Slightly off-white background */
+}
+
+#auth-status {
+    margin-bottom: 12px; /* Space between status and buttons */
+    text-align: center;
+}
+
+/* Color for authenticated status */
+#auth-status.authenticated {
+    color: #107C10; /* Fluent UI Success Green */
+}
+
+/* Color for not authenticated status */
+#auth-status.not-authenticated {
+    color: #605E5C; /* Fluent UI Neutral Secondary */
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+/* Ensure logout button uses default styling and is hidden initially */
+#logoutButton {
+    display: none; /* Hide by default, JS will show it */
+}

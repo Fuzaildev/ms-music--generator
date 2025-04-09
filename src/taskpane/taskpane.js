@@ -121,15 +121,15 @@ function updateAuthUI(isAuthenticated) {
   
   if (isAuthenticated) {
     authStatus.textContent = 'Authenticated';
-    authStatus.className = 'auth-status authenticated';
+    authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold authenticated';
     loginButton.style.display = 'none';
-    logoutButton.style.display = 'block';
+    logoutButton.style.display = 'inline-block';
     runButton.disabled = false;
     enhanceButton.disabled = false;
   } else {
     authStatus.textContent = 'Not authenticated';
-    authStatus.className = 'auth-status not-authenticated';
-    loginButton.style.display = 'block';
+    authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold not-authenticated';
+    loginButton.style.display = 'inline-block';
     logoutButton.style.display = 'none';
     runButton.disabled = true;
     enhanceButton.disabled = true;
@@ -272,24 +272,38 @@ function getPremiumPurchaseUrl(userId) {
 
 // Update checkTokens function
 async function checkTokens() {
+  const tokenDisplay = document.getElementById("token-display");
+  const generateButton = document.getElementById("run");
+
   try {
-    // Get user ID from auth manager
-    if (!authManager) {
-      console.error("Auth manager not initialized");
-      return;
+    // Check authentication status first
+    if (!authManager || authManager.isTokenExpired()) {
+      console.log("User is not authenticated. Skipping token check.");
+      tokenDisplay.textContent = "0";
+      tokenDisplay.classList.remove("premium");
+      generateButton.disabled = true;
+      generateButton.classList.add('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Login Required";
+      return; // Exit the function early
     }
-    
+
+    // Get user ID from auth manager only if authenticated
     const userId = authManager.getUserId();
     if (!userId) {
-      console.warn("No user ID available");
+      console.warn("Authenticated user has no ID available. Check auth flow.");
+      tokenDisplay.textContent = "0";
+      tokenDisplay.classList.remove("premium");
+      generateButton.disabled = true;
+      generateButton.classList.add('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Error"; // Indicate an issue
       return;
     }
-    
-    console.log("Checking tokens for user:", userId);
-    
+
+    console.log("Checking tokens for authenticated user:", userId);
+
     // First check premium status
     const isPremium = await checkPremiumStatus(userId);
-    
+
     const response = await fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`, {
       method: "GET"
     });
@@ -303,17 +317,15 @@ async function checkTokens() {
     const data = await response.json();
     console.log("Token check full response:", data);
     console.log("Credits object:", data.credits);
-    
-    const generateButton = document.getElementById("run");
-    const tokenDisplay = document.getElementById("token-display");
-    
+
     console.log("Is premium user?", isPremium);
-    
+
     if (isPremium) {
       // Handle premium user
       console.log("Handling premium user display");
       tokenDisplay.textContent = "∞";
       tokenDisplay.classList.add("premium");
+      // Ensure button is enabled for premium users, regardless of token count
       generateButton.disabled = false;
       generateButton.classList.remove('disabled');
       generateButton.querySelector(".ms-Button-label").textContent = "Generate Image";
@@ -330,7 +342,8 @@ async function checkTokens() {
         generateButton.disabled = true;
         generateButton.classList.add('disabled');
         generateButton.querySelector(".ms-Button-label").textContent = "No Tokens Available";
-        showError("You have no tokens left. Please get more credits to continue.");
+        // Don't show error here, just disable the button
+        // showError("You have no tokens left. Please get more credits to continue.");
       } else {
         console.log("Tokens available, enabling generate button");
         generateButton.disabled = false;
@@ -344,14 +357,12 @@ async function checkTokens() {
       message: error.message,
       stack: error.stack
     });
-    const tokenDisplay = document.getElementById("token-display");
     tokenDisplay.textContent = "0";
     tokenDisplay.classList.remove("premium");
-    // Disable button on error
-    const generateButton = document.getElementById("run");
+    // Disable button on error and show appropriate message
     generateButton.disabled = true;
     generateButton.classList.add('disabled');
-    generateButton.querySelector(".ms-Button-label").textContent = "No Tokens Available";
+    generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Tokens";
   }
 }
 
@@ -682,8 +693,19 @@ function cancelPurchaseCheck() {
 // Update getMoreCredits function to use new URL generator
 async function getMoreCredits() {
   try {
-    const userId = '301591';
-    
+    // Determine the user ID based on authentication status
+    let userId;
+    if (authManager.isTokenExpired()) {
+      console.log("User is not logged in, using default userId '1' for purchase.");
+      userId = '1';
+    } else {
+      userId = authManager.getUserId();
+      if (!userId) {
+        console.error("User is logged in but userId is not available. Using default '1'.");
+        userId = '1'; // Fallback if logged in but ID is missing
+      }
+    }
+
     // Get current token count and premium status before opening purchase page
     const [initialTokenResponse, initialPremiumStatus] = await Promise.all([
       fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`),

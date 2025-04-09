@@ -33,26 +33,6 @@
     </header>
     
     <main id="app-body" class="ms-welcome__main">
-        <!-- Auth Status Section -->
-        <div id="auth-section" class="auth-section">
-            <div id="auth-status" class="auth-status">Not authenticated</div>
-            <button id="loginButton" class="ms-Button ms-Button--primary">
-                <span class="ms-Button-label">Login</span>
-            </button>
-            <button id="logoutButton" class="ms-Button ms-Button--danger" style="display: none;">
-                <span class="ms-Button-label">Logout</span>
-            </button>
-        </div>
-        
-        <!-- Add loader -->
-        <div id="loader" class="loader-container">
-            <div class="loader-spinner"></div>
-            <div class="loader-text">Generating your image...</div>
-            <button id="cancel-generation" class="ms-Button ms-Button--danger">
-                <span class="ms-Button-label">Cancel Generation</span>
-            </button>
-        </div>
-
         <!-- Add Dropdown Section -->
         <div class="dropdown-wrapper">
             <label for="image-purpose-select" class="ms-Label">Select image purpose</label>
@@ -88,6 +68,28 @@
         
         <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero">
             <span class="ms-Button-label">Generate Image</span>
+        </div>
+
+        <!-- Auth Status Section -->
+        <div id="auth-section" class="auth-section">
+            <div id="auth-status" class="ms-fontSize-m ms-fontWeight-semibold">Not authenticated</div>
+            <div class="auth-buttons">
+                <button id="loginButton" class="ms-Button ms-Button--primary">
+                    <span class="ms-Button-label">Login</span>
+                </button>
+                <button id="logoutButton" class="ms-Button">
+                    <span class="ms-Button-label">Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Add loader -->
+        <div id="loader" class="loader-container">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">Generating your image...</div>
+            <button id="cancel-generation" class="ms-Button ms-Button--danger">
+                <span class="ms-Button-label">Cancel Generation</span>
+            </button>
         </div>
     </main>
 
