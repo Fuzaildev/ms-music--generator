@@ -11,6 +11,7 @@
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
     <AppDomain>https://www.contoso.com</AppDomain>
+    <AppDomain>https://multiplewords.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Document"/>
@@ -19,6 +20,10 @@
     <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
+  <WebApplicationInfo>
+    <Id>HGn3aX2z6aOFhikeyc2MXLcrEdxw6apkZo2W0MiW</Id>
+    <Resource>api://multiplewords.com/HGn3aX2z6aOFhikeyc2MXLcrEdxw6apkZo2W0MiW</Resource>
+  </WebApplicationInfo>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Document">

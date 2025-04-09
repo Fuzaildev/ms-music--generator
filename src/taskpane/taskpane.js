@@ -5,10 +5,16 @@
 
 /* global document, Office, Word */
 
+// Initialize auth manager
+let authManager = null;
+
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
+    
+    // Initialize auth manager
+    authManager = new OfficeAuthManager();
     
     // Add credits footer to the DOM
     const footer = document.createElement('div');
@@ -28,6 +34,10 @@ Office.onReady((info) => {
     document.querySelector(".enhance-button").onclick = enhancePrompt;
     document.getElementById("get-more-credits").onclick = getMoreCredits;
     document.getElementById("cancel-generation").onclick = cancelGeneration;
+    
+    // Set up auth event listeners
+    document.getElementById("loginButton").onclick = handleLogin;
+    document.getElementById("logoutButton").onclick = handleLogout;
 
     // Add styles for the credits footer
     const style = document.createElement('style');
@@ -71,6 +81,9 @@ Office.onReady((info) => {
 
     // Initial token check
     checkTokens();
+    
+    // Check authentication status
+    checkAuthStatus();
 
     // Set up interval for token checking every 3 seconds
     const tokenCheckInterval = setInterval(checkTokens, 3000);
@@ -83,6 +96,133 @@ Office.onReady((info) => {
     });
   }
 });
+
+// Check authentication status
+function checkAuthStatus() {
+  console.log("Checking authentication status");
+  if (!authManager) {
+    console.error("Auth manager not initialized");
+    return;
+  }
+  
+  const isAuthenticated = !authManager.isTokenExpired();
+  console.log("Authentication status:", isAuthenticated);
+  updateAuthUI(isAuthenticated);
+}
+
+// Update authentication UI
+function updateAuthUI(isAuthenticated) {
+  console.log("Updating UI for authentication status:", isAuthenticated);
+  const authStatus = document.getElementById('auth-status');
+  const loginButton = document.getElementById('loginButton');
+  const logoutButton = document.getElementById('logoutButton');
+  const runButton = document.getElementById('run');
+  const enhanceButton = document.querySelector('.enhance-button');
+  
+  if (isAuthenticated) {
+    authStatus.textContent = 'Authenticated';
+    authStatus.className = 'auth-status authenticated';
+    loginButton.style.display = 'none';
+    logoutButton.style.display = 'block';
+    runButton.disabled = false;
+    enhanceButton.disabled = false;
+  } else {
+    authStatus.textContent = 'Not authenticated';
+    authStatus.className = 'auth-status not-authenticated';
+    loginButton.style.display = 'block';
+    logoutButton.style.display = 'none';
+    runButton.disabled = true;
+    enhanceButton.disabled = true;
+  }
+}
+
+// Add variable to track current authentication process
+let currentAuthProcess = null;
+
+// Handle login
+async function handleLogin() {
+  console.log("Login button clicked");
+  try {
+    showLoader("Authenticating...", false);
+    console.log("Starting authentication process");
+    
+    // Store the authentication promise
+    currentAuthProcess = authManager.authenticate();
+    const result = await currentAuthProcess;
+    currentAuthProcess = null;
+    
+    console.log("Authentication result:", result);
+    
+    if (result.success) {
+      console.log("Authentication successful");
+      showSuccess("Authentication successful!");
+      updateAuthUI(true);
+    } else {
+      // Provide more specific error messages based on the error type
+      let errorMessage = result.error;
+      console.error("Authentication failed:", errorMessage);
+      
+      if (errorMessage.includes("Popup was blocked")) {
+        errorMessage = "Your browser blocked the authentication popup. Please follow the instructions in the modal.";
+      } else if (errorMessage.includes("Authentication cancelled by user")) {
+        errorMessage = "Authentication was cancelled.";
+      } else if (errorMessage.includes("Authentication timed out")) {
+        errorMessage = "Authentication timed out. Please try again.";
+      } else if (errorMessage.includes("State mismatch")) {
+        errorMessage = "Security verification failed. Please try again.";
+      }
+      
+      showError(`Authentication failed: ${errorMessage}`);
+      updateAuthUI(false);
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    showError(`Error: ${error.message}`);
+    updateAuthUI(false);
+  } finally {
+    // Always hide the loader and reset the current process
+    hideLoader();
+    currentAuthProcess = null;
+  }
+}
+
+// Add cancel authentication function
+async function cancelAuthentication() {
+  console.log("Cancelling authentication process");
+  if (authManager) {
+    authManager.cancelAuth();
+  }
+  if (currentAuthProcess) {
+    currentAuthProcess = null;
+  }
+  hideLoader();
+  showNotification("Authentication cancelled.", "info");
+  updateAuthUI(false);
+}
+
+// Update showLoader function to handle authentication cancellation
+function showLoader(message = "Generating your image...", isGenerating = true) {
+  const loader = document.getElementById("loader");
+  const loaderText = loader.querySelector(".loader-text");
+  const cancelButton = document.getElementById("cancel-generation");
+  
+  loaderText.textContent = message;
+  loader.classList.add("active");
+  
+  // Show appropriate cancel button text based on the operation
+  if (cancelButton) {
+    cancelButton.querySelector(".ms-Button-label").textContent = isGenerating ? "Cancel Generation" : "Cancel";
+    cancelButton.onclick = isGenerating ? cancelGeneration : cancelAuthentication;
+  }
+}
+
+// Handle logout
+function handleLogout() {
+  console.log("Logout button clicked");
+  authManager.logout();
+  updateAuthUI(false);
+  showSuccess("Logged out successfully");
+}
 
 // Add variable to track the current generation request
 let currentGenerationController = null;
@@ -133,7 +273,18 @@ function getPremiumPurchaseUrl(userId) {
 // Update checkTokens function
 async function checkTokens() {
   try {
-    const userId = '301591';
+    // Get user ID from auth manager
+    if (!authManager) {
+      console.error("Auth manager not initialized");
+      return;
+    }
+    
+    const userId = authManager.getUserId();
+    if (!userId) {
+      console.warn("No user ID available");
+      return;
+    }
+    
     console.log("Checking tokens for user:", userId);
     
     // First check premium status
@@ -204,22 +355,6 @@ async function checkTokens() {
   }
 }
 
-// Add function to control loader
-function showLoader(message = "Generating your image...", isGenerating = true) {
-  const loader = document.getElementById("loader");
-  const loaderText = loader.querySelector(".loader-text");
-  const cancelButton = document.getElementById("cancel-generation");
-  
-  loaderText.textContent = message;
-  loader.classList.add("active");
-  
-  // Show appropriate cancel button text based on the operation
-  if (cancelButton) {
-    cancelButton.querySelector(".ms-Button-label").textContent = isGenerating ? "Cancel Generation" : "Cancel";
-    cancelButton.onclick = isGenerating ? cancelGeneration : cancelPurchaseCheck;
-  }
-}
-
 function hideLoader() {
   const loader = document.getElementById("loader");
   loader.classList.remove("active");
@@ -252,10 +387,24 @@ async function cancelGeneration() {
   }
 }
 
-// Update generateImage function to support cancellation
+// Update generateImage function
 async function generateImage() {
   try {
-    const userId = '301591';
+    // Check if user is authenticated
+    if (authManager.isTokenExpired()) {
+      showError("Please login to generate images");
+      return;
+    }
+    
+    // Get access token and user ID
+    const token = await authManager.getAccessToken();
+    const userId = authManager.getUserId();
+    
+    if (!userId) {
+      showError("User ID not available. Please try logging in again.");
+      return;
+    }
+    
     const isPremium = await checkPremiumStatus(userId);
     
     const promptText = document.querySelector(".input-field").value.trim();
@@ -323,7 +472,7 @@ async function generateImage() {
     const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/generate_image", {
       method: "POST",
       body: imageFormData,
-      signal: currentGenerationController.signal // Add abort signal to the request
+      signal: currentGenerationController.signal
     });
 
     console.log("Image generation response status:", response.status);
@@ -458,8 +607,18 @@ async function fetchImageAsBase64(imageUrl) {
   }
 }
 
+// Update enhancePrompt function to use authentication
 async function enhancePrompt() {
   try {
+    // Check if user is authenticated
+    if (authManager.isTokenExpired()) {
+      showError("Please login to enhance prompts");
+      return;
+    }
+    
+    // Get access token
+    const token = await authManager.getAccessToken();
+    
     const textarea = document.querySelector(".input-field");
     const currentPrompt = textarea.value.trim();
     const purposeSelect = document.getElementById("image-purpose-select");
@@ -501,7 +660,7 @@ async function enhancePrompt() {
 
   } catch (error) {
     console.error("Error in enhancePrompt:", error);
-    showError("Failed to enhance the prompt. Please try again.");
+    showError(`Error: ${error.message}`);
   } finally {
     // Reset the enhance button state
     const enhanceButton = document.querySelector(".enhance-button");

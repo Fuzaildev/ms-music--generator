@@ -18,6 +18,9 @@
 
     <!-- Template styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Auth Manager -->
+    <script src="services/auth-manager.js"></script>
 </head>
 
 <body class="ms-font-m ms-Fabric">
@@ -30,6 +33,17 @@
     </header>
     
     <main id="app-body" class="ms-welcome__main">
+        <!-- Auth Status Section -->
+        <div id="auth-section" class="auth-section">
+            <div id="auth-status" class="auth-status">Not authenticated</div>
+            <button id="loginButton" class="ms-Button ms-Button--primary">
+                <span class="ms-Button-label">Login</span>
+            </button>
+            <button id="logoutButton" class="ms-Button ms-Button--danger" style="display: none;">
+                <span class="ms-Button-label">Logout</span>
+            </button>
+        </div>
+        
         <!-- Add loader -->
         <div id="loader" class="loader-container">
             <div class="loader-spinner"></div>

@@ -362,3 +362,31 @@ textarea.input-field::placeholder {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Auth Section Styles */
+.auth-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.auth-status {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.auth-status.authenticated {
+    color: #107C10;
+}
+
+.auth-status.not-authenticated {
+    color: #A4262C;
+}
+
+#loginButton, #logoutButton {
+    margin: 5px;
+}
