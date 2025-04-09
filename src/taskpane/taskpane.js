@@ -16,18 +16,13 @@ Office.onReady((info) => {
     // Initialize auth manager
     authManager = new OfficeAuthManager();
     
-    // Add credits footer to the DOM
-    const footer = document.createElement('div');
-    footer.className = 'credits-footer';
-    footer.innerHTML = `
-      <div class="credits-display">
-        <span>Available Credits: <span id="token-display">0</span></span>
-        <button id="get-more-credits" class="ms-Button ms-Button--small">
-          <span class="ms-Button-label">Get More Credits</span>
-        </button>
-      </div>
-    `;
-    document.body.appendChild(footer);
+    // Ensure generate button is visible
+    const runButton = document.getElementById("run");
+    if (runButton) {
+      runButton.style.display = "flex";
+      runButton.style.visibility = "visible";
+      runButton.style.opacity = "1";
+    }
     
     // Set up event listeners
     document.getElementById("run").onclick = generateImage;
@@ -35,46 +30,6 @@ Office.onReady((info) => {
     document.getElementById("get-more-credits").onclick = getMoreCredits;
     document.getElementById("cancel-generation").onclick = cancelGeneration;
     document.getElementById("logoutButton").onclick = handleLogout;
-
-    // Add styles for the credits footer
-    const style = document.createElement('style');
-    style.textContent = `
-      .credits-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #f3f3f3;
-        border-top: 1px solid #ddd;
-        padding: 10px;
-        z-index: 1000;
-      }
-      .credits-display {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 14px;
-      }
-      #token-display {
-        font-weight: bold;
-        color: #107C10;
-      }
-      #token-display.premium {
-        color: #B4009E;
-      }
-      #get-more-credits {
-        background: #0078D4;
-        color: white;
-        border: none;
-        padding: 4px 8px;
-        cursor: pointer;
-        font-size: 12px;
-      }
-      #get-more-credits:hover {
-        background: #106EBE;
-      }
-    `;
-    document.head.appendChild(style);
 
     // Initial token check
     checkTokens();
@@ -110,7 +65,6 @@ function checkAuthStatus() {
 // Update authentication UI
 function updateAuthUI(isAuthenticated) {
   console.log("Updating UI for authentication status:", isAuthenticated);
-  const authStatus = document.getElementById('auth-status');
   const logoutButton = document.getElementById('logoutButton');
   const runButton = document.getElementById('run');
   const enhanceButton = document.querySelector('.enhance-button');
@@ -118,17 +72,17 @@ function updateAuthUI(isAuthenticated) {
   const generateButtonLabel = runButton.querySelector('.ms-Button-label');
   
   if (isAuthenticated) {
-    authStatus.textContent = 'Authenticated';
-    authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold authenticated';
     logoutButton.style.display = 'inline-block';
+    runButton.style.display = 'flex';
+    runButton.style.visibility = 'visible';
     runButton.disabled = false;
     generateButtonLabel.textContent = 'Generate Image';
     enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = false;
   } else {
-    authStatus.textContent = 'Not authenticated';
-    authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold not-authenticated';
     logoutButton.style.display = 'none';
+    runButton.style.display = 'flex';
+    runButton.style.visibility = 'visible';
     runButton.disabled = false;
     generateButtonLabel.textContent = 'Click here to Generate image';
     enhanceButton.disabled = false;

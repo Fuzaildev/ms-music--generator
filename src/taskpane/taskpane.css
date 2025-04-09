@@ -16,6 +16,7 @@
      /* Ensure body fills height for flex alignment */
      display: flex;
      flex-direction: column;
+     overflow: hidden;
  }
  
  ul {
@@ -24,18 +25,19 @@
  }
  
  .ms-welcome__header {
-    padding: 20px 24px; 
+    padding: 16px 24px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     background: transparent;
     /* Lighten border or remove if background is white */
     border-bottom: 1px solid #F3F4F6; 
-    /* Keep consistent bottom margin */
-    margin-bottom: 20px; 
+    flex-shrink: 0;
+    margin-bottom: 0;
  }
 
  .header-top {
+    padding: 8px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -49,7 +51,7 @@
 
  .ms-welcome__header h1 {
     /* Slightly smaller, standard weight */
-    font-size: 28px; 
+    font-size: 24px; 
     line-height: 1.2;
     font-weight: 600; /* Semibold */
     color: #1f4e7a; /* Use a Fluent UI theme color */
@@ -58,10 +60,10 @@
  }
 
  .ms-welcome__header p {
+    margin: 4px 0;
     font-size: 14px; 
     line-height: 1.5;
     color: #605E5C; 
-    margin: 0;
     text-align: left;
     max-width: 100%;
     /* Add a little space above the paragraph */
@@ -69,26 +71,26 @@
  }
 
  #auth-status {
-    margin-top: 8px;
-    font-size: 14px;
+    display: none;
  }
 
  #auth-status.authenticated {
-    color: #107C10;
+    display: none;
  }
 
  #auth-status.not-authenticated {
-    color: #605E5C;
+    display: none;
  }
 
  .ms-welcome__main {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    flex: 1 0 0;
-    padding: 0 24px 24px 24px; /* Add bottom padding */
+    align-items: stretch;
+    padding: 16px 24px 80px 24px; /* Added bottom padding to account for footer */
     width: 100%;
     box-sizing: border-box;
+    flex: 1;
+    position: relative;
  }
 
  .input-wrapper {
@@ -100,6 +102,9 @@
  /* Combined styles for textarea and input */
  .input-field {
     width: 100%;
+    min-height: 80px;
+    max-height: 120px;
+    resize: none;
     /* Adjusted padding */
     padding: 8px 12px; 
     font-size: 14px;
@@ -152,26 +157,27 @@
     border-color: #A19F9D; /* Darker neutral border on hover */
  }
  
- .ms-welcome__action.ms-Button--hero {
+ #run.ms-welcome__action.ms-Button--hero {
     width: 100%;
-    padding: 8px 12px; 
-    border-radius: 2px; 
-    background: #0078D4; 
-    border: 1px solid #0078D4; 
-    transition: all 0.2s ease;
-    text-align: center;
-    position: relative;
+    padding: 8px 12px;
+    margin: 8px 0 16px 0;
+    border-radius: 2px;
+    background: #0078D4;
+    border: 1px solid #0078D4;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    /* Ensure consistent spacing */
-    margin-top: 16px; 
+    z-index: 10;
  }
 
-.ms-Button.ms-Button--hero .ms-Button-label {
+#run.ms-Button--hero .ms-Button-label {
     color: white;
-    /* Standard button text size */
-    font-weight: 600; /* Semibold */
-    font-size: 14px; 
+    font-weight: 600;
+    font-size: 14px;
     line-height: 1;
+    display: block;
+    pointer-events: none;
 }
 
 .ms-Button.ms-Button--hero:hover {
@@ -226,7 +232,7 @@ b {
 /* Styles for the dropdown */
 .dropdown-wrapper {
    width: 100%;
-   margin-bottom: 16px; 
+   margin-bottom: 12px; 
 }
 
 .dropdown-wrapper .ms-Label {
@@ -526,4 +532,16 @@ textarea.input-field::placeholder {
     border-bottom-color: rgba(0, 120, 212, 0.2);
     border-left-color: #0078D4;
     animation: spin 1s linear infinite;
+}
+
+/* Adjust credits footer to not overlap with content */
+.credits-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f3f3f3;
+    border-top: 1px solid #ddd;
+    padding: 8px 24px;
+    z-index: 1000;
 }
