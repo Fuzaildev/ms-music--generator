@@ -118,6 +118,7 @@ function updateAuthUI(isAuthenticated) {
   const logoutButton = document.getElementById('logoutButton');
   const runButton = document.getElementById('run');
   const enhanceButton = document.querySelector('.enhance-button');
+  const getMoreCreditsButton = document.getElementById('get-more-credits');
   
   if (isAuthenticated) {
     authStatus.textContent = 'Authenticated';
@@ -126,6 +127,7 @@ function updateAuthUI(isAuthenticated) {
     logoutButton.style.display = 'inline-block';
     runButton.disabled = false;
     enhanceButton.disabled = false;
+    getMoreCreditsButton.disabled = false;
   } else {
     authStatus.textContent = 'Not authenticated';
     authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold not-authenticated';
@@ -133,6 +135,7 @@ function updateAuthUI(isAuthenticated) {
     logoutButton.style.display = 'none';
     runButton.disabled = true;
     enhanceButton.disabled = true;
+    getMoreCreditsButton.disabled = true;
   }
 }
 
@@ -407,8 +410,8 @@ async function generateImage() {
       return;
     }
     
-    // Get access token and user ID
-    const token = await authManager.getAccessToken();
+  
+   
     const userId = authManager.getUserId();
     
     if (!userId) {
@@ -621,14 +624,7 @@ async function fetchImageAsBase64(imageUrl) {
 // Update enhancePrompt function to use authentication
 async function enhancePrompt() {
   try {
-    // Check if user is authenticated
-    if (authManager.isTokenExpired()) {
-      showError("Please login to enhance prompts");
-      return;
-    }
-    
-    // Get access token
-    const token = await authManager.getAccessToken();
+
     
     const textarea = document.querySelector(".input-field");
     const currentPrompt = textarea.value.trim();
@@ -648,7 +644,6 @@ async function enhancePrompt() {
     // Create FormData for the API request
     const formData = new FormData();
     formData.append('prompt', currentPrompt);
-    formData.append('where', purposeSelect.value || 'Social Media Posts');
 
     // Make the API call
     const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/enhance_ai_image_prompt", {
@@ -693,17 +688,17 @@ function cancelPurchaseCheck() {
 // Update getMoreCredits function to use new URL generator
 async function getMoreCredits() {
   try {
-    // Determine the user ID based on authentication status
-    let userId;
+    // Check if user is authenticated
     if (authManager.isTokenExpired()) {
-      console.log("User is not logged in, using default userId '1' for purchase.");
-      userId = '1';
-    } else {
-      userId = authManager.getUserId();
-      if (!userId) {
-        console.error("User is logged in but userId is not available. Using default '1'.");
-        userId = '1'; // Fallback if logged in but ID is missing
-      }
+      showError("Please login to purchase credits");
+      return;
+    }
+    
+    // Get user ID from auth manager
+    const userId = authManager.getUserId();
+    if (!userId) {
+      showError("User ID not available. Please try logging in again.");
+      return;
     }
 
     // Get current token count and premium status before opening purchase page
