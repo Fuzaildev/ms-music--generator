@@ -203,6 +203,13 @@ async function cancelAuthentication() {
   updateAuthUI(false);
 }
 
+// Add cancel credits dialog function
+async function cancelCreditsDialog() {
+  console.log("Cancelling credits dialog");
+  hideLoader();
+  showNotification("Purchase cancelled.", "info");
+}
+
 // Update showLoader function to handle authentication cancellation
 function showLoader(message = "Generating your image...", isGenerating = true) {
   const loader = document.getElementById("loader");
@@ -215,8 +222,19 @@ function showLoader(message = "Generating your image...", isGenerating = true) {
   
   // Show appropriate cancel button text based on the operation
   if (cancelButton) {
-    cancelButton.querySelector(".ms-Button-label").textContent = isGenerating ? "Cancel Generation" : "Cancel";
-    cancelButton.onclick = isGenerating ? cancelGeneration : cancelAuthentication;
+    if (isGenerating) {
+      cancelButton.querySelector(".ms-Button-label").textContent = "Cancel Generation";
+      cancelButton.onclick = cancelGeneration;
+    } else if (message.includes("Authenticating")) {
+      cancelButton.querySelector(".ms-Button-label").textContent = "Cancel";
+      cancelButton.onclick = cancelAuthentication;
+    } else if (message.includes("purchase")) {
+      cancelButton.querySelector(".ms-Button-label").textContent = "Cancel";
+      cancelButton.onclick = cancelCreditsDialog;
+    } else {
+      cancelButton.querySelector(".ms-Button-label").textContent = "Cancel";
+      cancelButton.onclick = cancelCreditsDialog;
+    }
   }
   
   // Handle authentication loading experience
@@ -748,7 +766,7 @@ function cancelPurchaseCheck() {
   }
 }
 
-// Update getMoreCredits function to use new URL generator
+// Update getMoreCredits function to use dialog instead of new tab
 async function getMoreCredits() {
   try {
     // Check if user is authenticated
@@ -785,86 +803,101 @@ async function getMoreCredits() {
     // Show loader with purchase message and set it as not a generation operation
     showLoader("Processing your purchase...", false);
     
-    // Open the pricing page in a new window
-    const pricingUrl = getPremiumPurchaseUrl(userId);
-    window.open(pricingUrl, "_blank");
-    
-    // Clear any existing interval
-    if (purchaseCheckInterval) {
-      clearInterval(purchaseCheckInterval);
-    }
-    
-    let hasUpdated = false; // Flag to track if we've already handled the update
-
-    // Start polling for changes
-    purchaseCheckInterval = setInterval(async () => {
-      if (hasUpdated) return; // Skip if we've already handled the update
-
-      try {
-        // Check both token count and premium status
-        const [tokenResponse, newPremiumStatus] = await Promise.all([
-          fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`),
-          checkPremiumStatus(userId)
-        ]);
-        
-        if (!tokenResponse.ok) {
-          throw new Error('Failed to get current token count');
-        }
-
-        const tokenData = await tokenResponse.json();
-        const currentTokens = tokenData.credits?.videos || 0;
-        
-        console.log('Checking purchase status:', {
-          initialTokens,
-          currentTokens,
-          initialPremiumStatus,
-          newPremiumStatus,
-          tokenDiff: currentTokens - initialTokens
-        });
-        
-        // Stop checking if either tokens increased or user became premium
-        if (currentTokens > initialTokens || (!initialPremiumStatus && newPremiumStatus)) {
-          hasUpdated = true; // Set flag to prevent multiple updates
-          clearInterval(purchaseCheckInterval);
-          purchaseCheckInterval = null;
-          hideLoader();
-          
-          if (newPremiumStatus && !initialPremiumStatus) {
-            showSuccess("Premium status activated successfully!");
-          } else if (currentTokens > initialTokens) {
-            showSuccess(`Credits added successfully! (${currentTokens - initialTokens} tokens added)`);
-          }
-          
-          // Update token display
-          await checkTokens();
-        }
-      } catch (error) {
-        console.error("Error checking purchase status:", error);
-        // Don't stop polling on error, just log it
+    // Open the pricing page in a dialog instead of a new window
+    try {
+      const result = await authManager.openCreditsDialog(userId);
+      console.log("Credits dialog result:", result);
+      
+      // Hide the loader after the dialog is closed
+      hideLoader();
+      
+      // Check if the purchase was successful
+      if (result.success) {
+        // Start polling for changes to token count
+        startPurchaseCheck(userId, initialTokens, initialPremiumStatus);
+      } else {
+        // Dialog was cancelled or closed without a purchase
+        showNotification("Purchase cancelled or completed.", "info");
       }
-    }, 3000); // Check every 3 seconds
-    
-    // Set a timeout to stop checking after 5 minutes
-    setTimeout(() => {
-      if (purchaseCheckInterval && !hasUpdated) {
+    } catch (error) {
+      console.error("Error opening credits dialog:", error);
+      showError("Failed to open credits purchase page. Please try again.");
+      hideLoader();
+      return;
+    }
+  } catch (error) {
+    console.error("Error in getMoreCredits:", error);
+    showError("An error occurred while processing your request. Please try again.");
+    hideLoader();
+  }
+}
+
+// Helper function to start checking for purchase completion
+function startPurchaseCheck(userId, initialTokens, initialPremiumStatus) {
+  // Clear any existing interval
+  if (purchaseCheckInterval) {
+    clearInterval(purchaseCheckInterval);
+  }
+  
+  let hasUpdated = false; // Flag to track if we've already handled the update
+
+  // Start polling for changes
+  purchaseCheckInterval = setInterval(async () => {
+    if (hasUpdated) return; // Skip if we've already handled the update
+
+    try {
+      // Check both token count and premium status
+      const [tokenResponse, newPremiumStatus] = await Promise.all([
+        fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`),
+        checkPremiumStatus(userId)
+      ]);
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get current token count');
+      }
+
+      const tokenData = await tokenResponse.json();
+      const currentTokens = tokenData.credits?.videos || 0;
+      
+      console.log('Checking purchase status:', {
+        initialTokens,
+        currentTokens,
+        initialPremiumStatus,
+        newPremiumStatus,
+        tokenDiff: currentTokens - initialTokens
+      });
+      
+      // Stop checking if either tokens increased or user became premium
+      if (currentTokens > initialTokens || (!initialPremiumStatus && newPremiumStatus)) {
+        hasUpdated = true; // Set flag to prevent multiple updates
         clearInterval(purchaseCheckInterval);
         purchaseCheckInterval = null;
         hideLoader();
-        showNotification("Purchase status check timed out. Please refresh if you completed the purchase.", "error");
+        
+        if (newPremiumStatus && !initialPremiumStatus) {
+          showSuccess("Premium status activated successfully!");
+        } else if (currentTokens > initialTokens) {
+          showSuccess(`Credits added successfully! (${currentTokens - initialTokens} tokens added)`);
+        }
+        
+        // Update token display
+        await checkTokens();
       }
-    }, 5 * 60 * 1000); // 5 minutes timeout
-
-  } catch (error) {
-    console.error("Error in getMoreCredits:", error);
-    hideLoader();
-    showError("Failed to process purchase. Please try again later.");
-    
-    // Clean up interval on error
-    if (purchaseCheckInterval) {
+    } catch (error) {
+      console.error("Error checking purchase status:", error);
+      // Don't stop polling on error, just log it
+    }
+  }, 3000); // Check every 3 seconds
+  
+  // Set a timeout to stop checking after 5 minutes
+  setTimeout(() => {
+    if (purchaseCheckInterval && !hasUpdated) {
       clearInterval(purchaseCheckInterval);
       purchaseCheckInterval = null;
+      hideLoader();
+      showNotification("Purchase status check timed out. Please refresh if you completed the purchase.", "error");
     }
-  }
+  }, 5 * 60 * 1000); // 5 minutes timeout
 }
 
 // Clean up interval when the page is unloaded

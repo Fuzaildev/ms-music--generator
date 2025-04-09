@@ -12,6 +12,7 @@
   <AppDomains>
     <AppDomain>https://www.contoso.com</AppDomain>
     <AppDomain>https://multiplewords.com</AppDomain>
+    <AppDomain>https://saifs.ai</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Document"/>
