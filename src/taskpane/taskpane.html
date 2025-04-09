@@ -28,8 +28,14 @@
     <div id="notification" class="notification"></div>
 
     <header class="ms-welcome__header">
-        <h1>AI Image Generator</h1>
+        <div class="header-top">
+            <h1>AI Image Generator</h1>
+            <button id="logoutButton" class="ms-Button ms-Button--small">
+                <span class="ms-Button-label">Logout</span>
+            </button>
+        </div>
         <p>Transform your ideas into stunning visuals instantly</p>
+        <div id="auth-status" class="ms-fontSize-m ms-fontWeight-semibold">Not authenticated</div>
     </header>
     
     <main id="app-body" class="ms-welcome__main">
@@ -68,19 +74,6 @@
         
         <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero">
             <span class="ms-Button-label">Generate Image</span>
-        </div>
-
-        <!-- Auth Status Section -->
-        <div id="auth-section" class="auth-section">
-            <div id="auth-status" class="ms-fontSize-m ms-fontWeight-semibold">Not authenticated</div>
-            <div class="auth-buttons">
-                <button id="loginButton" class="ms-Button ms-Button--primary">
-                    <span class="ms-Button-label">Login</span>
-                </button>
-                <button id="logoutButton" class="ms-Button">
-                    <span class="ms-Button-label">Logout</span>
-                </button>
-            </div>
         </div>
 
         <!-- Add loader -->

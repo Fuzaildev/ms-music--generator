@@ -34,9 +34,6 @@ Office.onReady((info) => {
     document.querySelector(".enhance-button").onclick = enhancePrompt;
     document.getElementById("get-more-credits").onclick = getMoreCredits;
     document.getElementById("cancel-generation").onclick = cancelGeneration;
-    
-    // Set up auth event listeners
-    document.getElementById("loginButton").onclick = handleLogin;
     document.getElementById("logoutButton").onclick = handleLogout;
 
     // Add styles for the credits footer
@@ -114,27 +111,27 @@ function checkAuthStatus() {
 function updateAuthUI(isAuthenticated) {
   console.log("Updating UI for authentication status:", isAuthenticated);
   const authStatus = document.getElementById('auth-status');
-  const loginButton = document.getElementById('loginButton');
   const logoutButton = document.getElementById('logoutButton');
   const runButton = document.getElementById('run');
   const enhanceButton = document.querySelector('.enhance-button');
   const getMoreCreditsButton = document.getElementById('get-more-credits');
+  const generateButtonLabel = runButton.querySelector('.ms-Button-label');
   
   if (isAuthenticated) {
     authStatus.textContent = 'Authenticated';
     authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold authenticated';
-    loginButton.style.display = 'none';
     logoutButton.style.display = 'inline-block';
     runButton.disabled = false;
+    generateButtonLabel.textContent = 'Generate Image';
     enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = false;
   } else {
     authStatus.textContent = 'Not authenticated';
     authStatus.className = 'ms-fontSize-m ms-fontWeight-semibold not-authenticated';
-    loginButton.style.display = 'inline-block';
     logoutButton.style.display = 'none';
-    runButton.disabled = true;
-    enhanceButton.disabled = true;
+    runButton.disabled = false;
+    generateButtonLabel.textContent = 'Click here to Generate image';
+    enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = true;
   }
 }
@@ -380,9 +377,9 @@ async function checkTokens() {
       console.log("User is not authenticated. Skipping token check.");
       tokenDisplay.textContent = "0";
       tokenDisplay.classList.remove("premium");
-      generateButton.disabled = true;
-      generateButton.classList.add('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Login Required";
+      generateButton.disabled = false;
+      generateButton.classList.remove('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Click here to Generate image";
       return; // Exit the function early
     }
 
@@ -482,17 +479,28 @@ async function cancelGeneration() {
   }
 }
 
-// Update generateImage function
+// Update generateImage function to handle login if not authenticated
 async function generateImage() {
   try {
     // Check if user is authenticated
     if (authManager.isTokenExpired()) {
-      showError("Please login to generate images");
-      return;
+      // If not authenticated, handle login first
+      showLoader("Authenticating...", false);
+      const authResult = await authManager.authenticate();
+      
+      if (!authResult.success) {
+        hideLoader();
+        showError(`Authentication failed: ${authResult.error}`);
+        return;
+      }
+      
+      // Authentication successful, continue with image generation
+      hideLoader();
+      showSuccess("Authentication successful!");
+      updateAuthUI(true);
     }
     
-  
-   
+    // Now proceed with image generation
     const userId = authManager.getUserId();
     
     if (!userId) {
