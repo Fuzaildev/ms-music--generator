@@ -439,11 +439,6 @@ textarea.input-field::placeholder {
     gap: 4px;
 }
 
-#logoutButton::before {
-    content: '👤';
-    font-size: 14px;
-}
-
 #logoutButton:hover {
     background: #f0f8ff;
     border-color: #005A9E;
@@ -544,4 +539,26 @@ textarea.input-field::placeholder {
     border-top: 1px solid #ddd;
     padding: 8px 24px;
     z-index: 1000;
+}
+
+.ms-Button--icon {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.ms-Button--icon:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.ms-Button-icon {
+    font-size: 20px;
+    line-height: 1;
+    color: #323130;
 }
