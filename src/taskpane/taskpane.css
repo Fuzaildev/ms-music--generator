@@ -529,19 +529,23 @@ textarea.input-field::placeholder {
     animation: spin 1s linear infinite;
 }
 
-/* Adjust credits footer to not overlap with content */
+/* Styles for the credits footer */
 .credits-footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: #f3f3f3; /* Light grey background */
-    border-top: 1px solid #ddd; /* Subtle top border */
-    padding: 8px 24px; /* Padding around content */
-    z-index: 1000;
-    box-sizing: border-box; /* Include padding in width */
+    width: 100%;
+    background: #FFFFFF; /* Changed background to white */
+    padding: 12px 24px; /* Increased vertical padding */
+    box-sizing: border-box;
+    z-index: 100;
+    border-top: 1px solid #e1dfdd; /* Existing border */
 }
 
+/* Ensure the main content area doesn't overlap the fixed footer */
+/* Adjust padding-bottom on .ms-welcome__main if needed, though it seems to be handled */
+
+/* Styles for the logout button icon */
 .ms-Button--icon {
     background: transparent;
     border: none;
@@ -575,43 +579,50 @@ textarea.input-field::placeholder {
 }
 
 .credits-display span {
-    /* Ensure text stays on one line if needed */
     white-space: nowrap;
 }
 
-/* Style the 'Get More Credits' button */
+/* Make token count slightly bolder */
+#token-display {
+    font-weight: 600;
+}
+
+/* Style the 'Get More Credits' button - more user-friendly */
 #get-more-credits.ms-Button {
-    /* Reset some default Fluent UI styles if needed */
     margin: 0;
-    padding: 4px 8px; /* Smaller padding */
-    font-size: 12px; /* Slightly smaller font */
-    min-width: auto; /* Allow button to size naturally */
-    height: auto; /* Allow button to size naturally */
+    padding: 4px 10px; /* Slightly more horizontal padding */
+    font-size: 13px; /* Slightly larger */
+    min-width: auto;
+    height: auto;
     background-color: #FFFFFF; /* White background */
-    border: 1px solid #C8C6C4; /* Standard input border */
-    color: #323130; /* Standard text color */
-    border-radius: 2px; /* Subtle border radius */
-    box-shadow: none; /* Remove default shadow */
-    transition: background-color 0.2s ease, border-color 0.2s ease; /* Smooth transitions */
+    border: 1px solid #0078D4; /* Primary blue border */
+    color: #0078D4; /* Primary blue text */
+    border-radius: 4px; /* Slightly rounded corners */
+    box-shadow: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 600; /* Semibold */
+    cursor: pointer;
 }
 
 #get-more-credits.ms-Button:hover {
-    background-color: #F3F4F6; /* Light grey hover */
-    border-color: #A19F9D; /* Darker border on hover */
-    color: #323130;
+    background-color: #EFF6FC; /* Very light blue hover */
+    border-color: #005A9E; /* Darker blue border */
+    color: #005A9E; /* Darker blue text */
     box-shadow: none;
 }
 
 #get-more-credits.ms-Button:active {
-    background-color: #EDEBE9; /* Slightly darker active */
-    border-color: #A19F9D;
+    background-color: #DEECF9; /* Slightly darker active */
+    border-color: #005A9E;
+    color: #005A9E;
     box-shadow: none;
-    transform: none; /* Remove click effect */
+    transform: scale(0.98); /* Subtle click effect */
 }
 
 #get-more-credits.ms-Button .ms-Button-label {
-    font-weight: 400; /* Regular weight */
-    color: inherit; /* Inherit color from button */
+    /* Label styles are handled directly on the button now */
+    /* font-weight: 400; */ /* Removed - using font-weight on button */
+    color: inherit;
 }
 
 #get-more-credits.ms-Button.disabled,
@@ -626,4 +637,10 @@ textarea.input-field::placeholder {
 #get-more-credits.ms-Button:disabled:hover {
     background-color: #F3F2F1;
     border-color: #C8C6C4;
+    transform: none; /* Remove click effect on disabled */
+}
+
+/* Style for premium token display */
+#token-display.premium {
+    font-weight: 600;
 }
