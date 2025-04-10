@@ -84,7 +84,7 @@ function updateAuthUI(isAuthenticated) {
     runButton.style.display = 'flex';
     runButton.style.visibility = 'visible';
     runButton.disabled = false;
-    generateButtonLabel.textContent = 'Click here to Generate image';
+    generateButtonLabel.textContent = 'Sign in to Generate Image';
     enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = true;
   }
@@ -212,6 +212,7 @@ function startAuthLoadingAnimation() {
   // Clear any existing interval
   if (window.authLoadingInterval) {
     clearInterval(window.authLoadingInterval);
+    window.authLoadingInterval = null; // Ensure it's reset
   }
   
   // Function to update the active step
@@ -225,19 +226,30 @@ function startAuthLoadingAnimation() {
       steps[currentStep].classList.add('active');
       dots[currentStep].classList.add('active');
       currentStep++;
+      
+      // If this was the last step, clear the interval
+      if (currentStep >= steps.length) {
+        if (window.authLoadingInterval) {
+          clearInterval(window.authLoadingInterval);
+          window.authLoadingInterval = null;
+          console.log("Auth animation finished and stopped.");
+        }
+      }
     } else {
-      // If we've gone through all steps, start over
-      currentStep = 0;
-      steps[currentStep].classList.add('active');
-      dots[currentStep].classList.add('active');
+      // This part should ideally not be reached if interval is cleared correctly
+      // but as a fallback, clear interval here too
+      if (window.authLoadingInterval) {
+        clearInterval(window.authLoadingInterval);
+        window.authLoadingInterval = null;
+      }
     }
   }
   
   // Set initial active step
   updateActiveStep();
   
-  // Set interval to change steps every 6-7 seconds (for 30-35 second total auth time)
-  window.authLoadingInterval = setInterval(updateActiveStep, 6500);
+  // Set interval to change steps every 10 seconds (for 50 second total auth time)
+  window.authLoadingInterval = setInterval(updateActiveStep, 10000);
 }
 
 // Update hideLoader function to clean up auth loading animation
@@ -333,7 +345,7 @@ async function checkTokens() {
       tokenDisplay.classList.remove("premium");
       generateButton.disabled = false;
       generateButton.classList.remove('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Click here to Generate image";
+      generateButton.querySelector(".ms-Button-label").textContent = "Sign in to Generate Image";
       return; // Exit the function early
     }
 

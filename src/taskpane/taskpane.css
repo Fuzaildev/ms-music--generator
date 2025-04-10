@@ -535,10 +535,11 @@ textarea.input-field::placeholder {
     bottom: 0;
     left: 0;
     right: 0;
-    background: #f3f3f3;
-    border-top: 1px solid #ddd;
-    padding: 8px 24px;
+    background: #f3f3f3; /* Light grey background */
+    border-top: 1px solid #ddd; /* Subtle top border */
+    padding: 8px 24px; /* Padding around content */
     z-index: 1000;
+    box-sizing: border-box; /* Include padding in width */
 }
 
 .ms-Button--icon {
@@ -561,4 +562,68 @@ textarea.input-field::placeholder {
     font-size: 20px;
     line-height: 1;
     color: #323130;
+}
+
+/* Style the container for credits info */
+.credits-display {
+    display: flex; /* Arrange items horizontally */
+    align-items: center; /* Vertically align items in the middle */
+    justify-content: space-between; /* Space out text and button */
+    width: 100%; /* Take full width */
+    font-size: 14px; /* Standard font size */
+    color: #323130; /* Standard text color */
+}
+
+.credits-display span {
+    /* Ensure text stays on one line if needed */
+    white-space: nowrap;
+}
+
+/* Style the 'Get More Credits' button */
+#get-more-credits.ms-Button {
+    /* Reset some default Fluent UI styles if needed */
+    margin: 0;
+    padding: 4px 8px; /* Smaller padding */
+    font-size: 12px; /* Slightly smaller font */
+    min-width: auto; /* Allow button to size naturally */
+    height: auto; /* Allow button to size naturally */
+    background-color: #FFFFFF; /* White background */
+    border: 1px solid #C8C6C4; /* Standard input border */
+    color: #323130; /* Standard text color */
+    border-radius: 2px; /* Subtle border radius */
+    box-shadow: none; /* Remove default shadow */
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* Smooth transitions */
+}
+
+#get-more-credits.ms-Button:hover {
+    background-color: #F3F4F6; /* Light grey hover */
+    border-color: #A19F9D; /* Darker border on hover */
+    color: #323130;
+    box-shadow: none;
+}
+
+#get-more-credits.ms-Button:active {
+    background-color: #EDEBE9; /* Slightly darker active */
+    border-color: #A19F9D;
+    box-shadow: none;
+    transform: none; /* Remove click effect */
+}
+
+#get-more-credits.ms-Button .ms-Button-label {
+    font-weight: 400; /* Regular weight */
+    color: inherit; /* Inherit color from button */
+}
+
+#get-more-credits.ms-Button.disabled,
+#get-more-credits.ms-Button:disabled {
+    background-color: #F3F2F1;
+    border-color: #C8C6C4;
+    color: #A19F9D;
+    cursor: not-allowed;
+}
+
+#get-more-credits.ms-Button.disabled:hover,
+#get-more-credits.ms-Button:disabled:hover {
+    background-color: #F3F2F1;
+    border-color: #C8C6C4;
 }
