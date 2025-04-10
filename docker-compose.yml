@@ -1,0 +1,26 @@
+version: "3"
+services:
+    www:
+        build: .
+        volumes:
+            - persistance_one:/app/build
+        networks:
+            - default
+        environment:
+            # NGINX-PROXY ENVIRONMENT VARIABLES
+            - VIRTUAL_HOST=ms-ai-image-generator.saifs.ai
+            - VIRTUAL_PORT=80
+            - LETSENCRYPT_HOST=ms-ai-image-generator.saifs.ai
+            - LETSENCRYPT_EMAIL=multiple.words.one@gmail.com
+            # Application specific environment variables
+            - NODE_ENV=production
+        expose:
+            - 80
+
+volumes:
+    persistance_one:
+
+networks:
+    default:
+        external:
+            name: nginx-proxy 

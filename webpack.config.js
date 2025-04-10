@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const urlDev = "https://localhost:3000/";
-const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+const urlProd = "https://ms-ai-image-generator.saifs.ai/"; // Updated to your production URL
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -23,6 +23,7 @@ module.exports = async (env, options) => {
     },
     output: {
       clean: true,
+      path: __dirname + "/dist",
     },
     resolve: {
       extensions: [".html", ".js"],
@@ -90,6 +91,11 @@ module.exports = async (env, options) => {
         options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
+    },
+    stats: {
+      children: true,
+      warnings: true,
+      errors: true,
     },
   };
 
