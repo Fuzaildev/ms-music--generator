@@ -4,8 +4,8 @@
   <Version>1.0.0.0</Version>
   <ProviderName>Contoso</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Image generator"/>
-  <Description DefaultValue="A template to get started."/>
+  <DisplayName DefaultValue="Image generator: Saifs AI"/>
+  <Description DefaultValue="An AI image generator for Microsoft Office"/>
   <IconUrl DefaultValue="https://ms-ai-image-generator.saifs.ai/assets/image_gen_logo.png"/>
   <HighResolutionIconUrl DefaultValue="https://ms-ai-image-generator.saifs.ai/assets/image_gen_logo.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
@@ -80,7 +80,7 @@
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/>
         <bt:String id="CommandsGroup.Label" DefaultValue="Commands Group"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Image Generator"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Image Generator: Saifs AI"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Your sample add-in loaded successfully. Go to the HOME tab and click the 'Show Task Pane' button to get started."/>
