@@ -1,4 +1,4 @@
-FROM node:20.18.1-alpine
+FROM node:20.18.1-alpine AS builder
 
 WORKDIR /app
 
@@ -20,11 +20,17 @@ ENV NODE_ENV=production
 # Build the application
 RUN npm run build
 
-# Install serve to run the application
-RUN npm install -g serve
+# Use nginx to serve the files
+FROM nginx:alpine
+
+# Copy the built files from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
 
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "80"] 
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"] 

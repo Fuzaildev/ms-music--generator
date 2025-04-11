@@ -3,7 +3,8 @@ services:
     www:
         build: .
         volumes:
-            - persistance_one:/app/build
+            - persistance_one:/usr/share/nginx/html
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
             - default
         environment:
