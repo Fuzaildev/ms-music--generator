@@ -5,9 +5,64 @@
 
 /* global Office */
 
-Office.onReady(() => {
-  // If needed, Office.js is ready to be called.
+Office.onReady((info) => {
+  // Register the function with Office for all supported hosts
+  if (info.host === Office.HostType.Excel || 
+      info.host === Office.HostType.Word || 
+      info.host === Office.HostType.PowerPoint ||
+      info.host === Office.HostType.Outlook) {
+    // Register the function with Office.
+    Office.actions.associate("showTaskpane", showTaskpane);
+  }
 });
+
+/**
+ * Shows the taskpane when the add-in command is executed.
+ * @param event {Office.AddinCommands.Event}
+ */
+function showTaskpane(event) {
+  // Check which host is running the add-in
+  if (Office.context.host === Office.HostType.Outlook) {
+    // For Outlook, we need to use a different approach
+    // Show a notification that the add-in is running
+    const message = {
+      type: Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,
+      message: "Image Generator is ready. Click the button to generate images.",
+      icon: "Icon.80x80",
+      persistent: true,
+    };
+    
+    // Show a notification message
+    Office.context.mailbox.item.notificationMessages.replaceAsync(
+      "ImageGeneratorNotification",
+      message
+    );
+    
+    // Open the taskpane in Outlook
+    Office.context.ui.displayDialogAsync(
+      "https://ms-ai-image-generator.saifs.ai/taskpane.html",
+      { height: 60, width: 30, displayInIframe: true },
+      function(result) {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+          const dialog = result.value;
+          dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
+            // Handle messages from the dialog
+            console.log("Message from dialog:", arg.message);
+          });
+          dialog.display();
+        }
+      }
+    );
+  } else {
+    // For Word, Excel, and PowerPoint
+    // Show the taskpane
+    Office.context.document.settings.set("taskpaneVisible", true);
+    Office.context.document.settings.saveAsync();
+  }
+  
+  // Be sure to indicate when the function is complete
+  event.completed();
+}
 
 /**
  * Shows a notification when the add-in command is executed.
