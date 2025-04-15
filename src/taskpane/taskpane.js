@@ -329,7 +329,7 @@ async function checkPremiumStatus(userId) {
  * @returns {string} The premium purchase URL
  */
 function getPremiumPurchaseUrl(userId) {
-    return `https://saifs.ai/canva_pricing/${userId}/15`;
+    return `https://saifs.ai/canva_pricing/${userId}/16`;
 }
 
 // Update checkTokens function

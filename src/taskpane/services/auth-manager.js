@@ -621,7 +621,7 @@ class OfficeAuthManager {
         console.log("🛒 Opening credits purchase dialog for user:", userId);
         
         // Construct the URL for the credits purchase page
-        const creditsUrl = `https://saifs.ai/canva_pricing/${userId}/15`;
+        const creditsUrl = `https://saifs.ai/canva_pricing/${userId}/16`;
         console.log("🔗 Constructed credits URL:", creditsUrl);
         
         return new Promise((resolve, reject) => {
