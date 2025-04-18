@@ -6,6 +6,7 @@ class OfficeAuthManager {
         this.authEndpoint = 'https://multiplewords.com/oauth/office/authorize/';
         this.clientSecret = 'dknkj3ofK0Lh8mG5XrDNZSK7ldaYD2fI8bLBxCIqgXvrf4lMZyVAQhGqIIx3aIfFj4ZDeNazPfj9hmdhKBhmsU0slYCR2bR3t2C1uLv801ic4PxJOCnf28zdLoEjeWHg';
         this.tokenEndpoint = 'https://multiplewords.com/o/token/';
+
         this.dialog = null;
         this.state = null;
         this.platform = null;
