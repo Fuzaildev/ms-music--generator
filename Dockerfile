@@ -25,6 +25,8 @@ FROM nginx:alpine
 
 # Copy the built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
+# Explicitly copy assets directory
+COPY --from=builder /app/assets /usr/share/nginx/html/assets
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
