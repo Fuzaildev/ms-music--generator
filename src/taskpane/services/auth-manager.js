@@ -4,7 +4,8 @@ class OfficeAuthManager {
         this.clientId = 'HGn3aX2z6aOFhikeyc2MXLcrEdxw6apkZo2W0MiW';
         this.redirectUri = 'https://multiplewords.com/oauth/office/callback/';
         this.authEndpoint = 'https://multiplewords.com/oauth/office/authorize/';
-        this.tokenEndpoint = 'https://multiplewords.com/oauth/office/token/';
+        this.clientSecret = 'dknkj3ofK0Lh8mG5XrDNZSK7ldaYD2fI8bLBxCIqgXvrf4lMZyVAQhGqIIx3aIfFj4ZDeNazPfj9hmdhKBhmsU0slYCR2bR3t2C1uLv801ic4PxJOCnf28zdLoEjeWHg';
+        this.tokenEndpoint = 'https://multiplewords.com/o/token/';
         this.dialog = null;
         this.state = null;
         this.platform = null;
@@ -300,6 +301,7 @@ class OfficeAuthManager {
         data.append('grant_type', 'authorization_code');
         data.append('code', code);
         data.append('client_id', this.clientId);
+        data.append('client_secret', this.clientSecret);
         data.append('redirect_uri', this.redirectUri);
         data.append('include_user_info', 'true'); // Request user info in response
         
