@@ -123,7 +123,7 @@ function updateAuthUI(isAuthenticated) {
     runButton.style.display = 'flex';
     runButton.style.visibility = 'visible';
     runButton.disabled = false;
-    generateButtonLabel.textContent = 'Generate Image';
+    generateButtonLabel.textContent = 'Generate Music';
     enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = false;
   } else {
@@ -131,7 +131,7 @@ function updateAuthUI(isAuthenticated) {
     runButton.style.display = 'flex';
     runButton.style.visibility = 'visible';
     runButton.disabled = false;
-    generateButtonLabel.textContent = 'Sign in to Generate Image';
+    generateButtonLabel.textContent = 'Sign in to Generate Music';
     enhanceButton.disabled = false;
     getMoreCreditsButton.disabled = true;
   }
@@ -379,66 +379,32 @@ function getPremiumPurchaseUrl(userId) {
     return `https://saifs.ai/canva_pricing/${userId}/16`;
 }
 
-// Check tokens function for music generation
+// Update checkTokens function
 async function checkTokens() {
   const tokenDisplay = document.getElementById("token-display");
   const generateButton = document.getElementById("run");
-  const creditsFooter = document.getElementById("credits-footer");
-
-  console.log("🔍 checkTokens called - DOM elements check:", {
-    tokenDisplay: !!tokenDisplay,
-    generateButton: !!generateButton,
-    creditsFooter: !!creditsFooter,
-    tokenDisplayElement: tokenDisplay,
-    currentTokenText: tokenDisplay?.textContent
-  });
 
   try {
     // Check authentication status first
     if (!authManager || authManager.isTokenExpired()) {
-      console.log("User is not authenticated. Hiding credits footer.");
-      
-      // Hide the entire credits footer when not authenticated
-      if (creditsFooter) {
-        creditsFooter.style.display = "none";
-        console.log("✅ Credits footer hidden for non-authenticated user");
-      }
-      
-      // Clear token display when not authenticated
-      if (tokenDisplay) {
-        tokenDisplay.textContent = '';
-        tokenDisplay.classList.remove("premium");
-      }
-      
-      // Set appropriate button text for non-authenticated users
-      if (generateButton) {
-        const generateButtonLabel = generateButton.querySelector('.ms-Button-label');
-        generateButton.disabled = false;
-        generateButton.classList.remove('disabled');
-        generateButtonLabel.textContent = 'Sign in to Generate Music';
-      }
+      console.log("User is not authenticated. Skipping token check.");
+      tokenDisplay.textContent = "0";
+      tokenDisplay.classList.remove("premium");
+      generateButton.disabled = false;
+      generateButton.classList.remove('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Sign in to Generate Music";
       return; // Exit the function early
-    }
-
-    // Show the credits footer when authenticated
-    if (creditsFooter) {
-      creditsFooter.style.display = "flex";
-      console.log("✅ Credits footer shown for authenticated user");
     }
 
     // Get user ID from auth manager only if authenticated
     const userId = authManager.getUserId();
     if (!userId) {
       console.warn("Authenticated user has no ID available. Check auth flow.");
-      if (tokenDisplay) {
-        tokenDisplay.textContent = "Error";
-        tokenDisplay.classList.remove("premium");
-      }
-      if (generateButton) {
-        generateButton.disabled = true;
-        generateButton.classList.add('disabled');
-        generateButton.querySelector(".ms-Button-label").textContent = "Authentication Error";
-      }
+      tokenDisplay.textContent = "0";
+      tokenDisplay.classList.remove("premium");
+      generateButton.disabled = true;
+      generateButton.classList.add('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Error"; // Indicate an issue
       return;
     }
 
@@ -466,49 +432,32 @@ async function checkTokens() {
     if (isPremium) {
       // Handle premium user
       console.log("Handling premium user display");
-      if (tokenDisplay) {
-        console.log("🔄 Setting token display to ∞ for premium user");
-        tokenDisplay.textContent = "∞";
-        tokenDisplay.classList.add("premium");
-        console.log("✅ Token display updated:", {
-          textContent: tokenDisplay.textContent,
-          classList: tokenDisplay.classList.toString(),
-          style: tokenDisplay.style.cssText
-        });
-      }
-      
+      tokenDisplay.textContent = "∞";
+      tokenDisplay.classList.add("premium");
       // Ensure button is enabled for premium users, regardless of token count
-      if (generateButton) {
-        generateButton.disabled = false;
-        generateButton.classList.remove('disabled');
-        generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
-        console.log("✅ Generate button updated for premium user");
-      }
+      generateButton.disabled = false;
+      generateButton.classList.remove('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
     } else {
       // Handle regular user
       const tokenCount = data.credits && typeof data.credits.videos !== 'undefined' ? data.credits.videos : 0;
       console.log("Regular user token count:", tokenCount);
-      if (tokenDisplay) {
-        tokenDisplay.textContent = tokenCount;
-        tokenDisplay.classList.remove("premium");
-        console.log("✅ Token display updated for regular user:", tokenCount);
-      }
+      tokenDisplay.textContent = tokenCount;
+      tokenDisplay.classList.remove("premium");
 
       // Disable/enable generate button based on token availability
       if (tokenCount <= 0) {
         console.log("No tokens available, disabling generate button");
-        if (generateButton) {
-          generateButton.disabled = true;
-          generateButton.classList.add('disabled');
-          generateButton.querySelector(".ms-Button-label").textContent = "No Credits Available";
-        }
+        generateButton.disabled = true;
+        generateButton.classList.add('disabled');
+        generateButton.querySelector(".ms-Button-label").textContent = "No Tokens Available";
+        // Don't show error here, just disable the button
+        // showError("You have no tokens left. Please get more credits to continue.");
       } else {
         console.log("Tokens available, enabling generate button");
-        if (generateButton) {
-          generateButton.disabled = false;
-          generateButton.classList.remove('disabled');
-          generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
-        }
+        generateButton.disabled = false;
+        generateButton.classList.remove('disabled');
+        generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
       }
     }
   } catch (error) {
@@ -517,16 +466,12 @@ async function checkTokens() {
       message: error.message,
       stack: error.stack
     });
-    if (tokenDisplay) {
-      tokenDisplay.textContent = "Error";
-      tokenDisplay.classList.remove("premium");
-    }
+    tokenDisplay.textContent = "0";
+    tokenDisplay.classList.remove("premium");
     // Disable button on error and show appropriate message
-    if (generateButton) {
-      generateButton.disabled = true;
-      generateButton.classList.add('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Credits";
-    }
+    generateButton.disabled = true;
+    generateButton.classList.add('disabled');
+    generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Tokens";
   }
 }
 
@@ -628,13 +573,24 @@ async function generateImage() {
     // Create AbortController for the request
     currentGenerationController = new AbortController();
 
+    // Get the premium status details
+    const premiumResponse = await fetch(`https://multiplewords.com/api/account/user_settings/${userId}`);
+    if (!premiumResponse.ok) {
+        throw new Error(`Failed to get premium status: ${premiumResponse.status}`);
+    }
+    const premiumData = await premiumResponse.json();
+    const userRecord = premiumData?.user_info?.find(user => user.user_id === parseInt(userId));
+    const isUserPaid = userRecord?.is_user_paid || false;
+
     // Create FormData for music generation
     const musicFormData = new FormData();
     musicFormData.append('user_id', userId);
     musicFormData.append('music_category_id', categorySelect.value);
     musicFormData.append('music_description', promptText);
-    musicFormData.append('music_name', promptText.substring(0, 50)); // Use first 50 chars of prompt as name
-    musicFormData.append('reference_music_id', '1'); // Default reference music ID
+    musicFormData.append('music_name', promptText.substring(0, 50));
+    musicFormData.append('reference_music_id', '1');
+    musicFormData.append('isPro', 'true');
+    musicFormData.append('isProSuper', isUserPaid ? 'true' : 'false');
 
     // Log the request
     console.log("Music generation request:", {
@@ -642,7 +598,9 @@ async function generateImage() {
         music_category_id: categorySelect.value,
         music_description: promptText,
         music_name: promptText.substring(0, 50),
-        reference_music_id: '1'
+        reference_music_id: '1',
+        isPro: true,
+        isProSuper: isUserPaid
     });
 
     try {
@@ -664,82 +622,192 @@ async function generateImage() {
         if (data.status === 1 && data.music_id) {
             console.log("Successfully received music ID:", data.music_id);
             
-            // Reduce token count immediately after successful API call for non-premium users
-            if (!isPremium) {
-                console.log("Reducing token count for non-premium user after successful API call");
-                try {
-                    // Get current token count
-                    const tokenResponse = await fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`, {
-                        method: "GET"
-                    });
-
-                    if (!tokenResponse.ok) {
-                        throw new Error(`Failed to get token count: ${tokenResponse.status}`);
-                    }
-
-                    const tokenData = await tokenResponse.json();
-                    console.log("Current token data:", tokenData);
-
-                    // Update token display
-                    const tokenDisplay = document.getElementById("token-display");
-                    const currentTokens = tokenData.credits?.videos || 0;
-                    tokenDisplay.textContent = currentTokens;
-                    console.log("Updated token count:", currentTokens);
-
-                    // Update generate button state if no tokens left
-                    const generateButton = document.getElementById("run");
-                    if (currentTokens <= 0) {
-                        generateButton.disabled = true;
-                        generateButton.classList.add('disabled');
-                        generateButton.querySelector(".ms-Button-label").textContent = "No Credits Available";
-                    }
-                } catch (error) {
-                    console.error("Error updating tokens:", error);
-                    // Don't block the music generation process if token update fails
-                    // Just log the error and continue
-                }
-            }
-            
             // Update loader message
             showLoader("Checking music generation status...");
             
-            // Add retry logic for checking music status
+            // Add retry logic for checking music status - infinite retries
             let retryCount = 0;
-            const maxRetries = 15; // Increased max retries
-            const retryDelay = 5000; // Increased to 5 seconds
-            const maxRetryDelay = 15000; // Maximum delay of 15 seconds
+            const retryDelay = 2000; // 2 seconds
 
             const checkMusicStatus = async () => {
                 try {
-                    const response = await fetch(`https://multiplewords.com/api/check_queue_music/${data.music_id}`);
-                    const data = await response.json();
+                    // Call the check_queue_music API with the correct endpoint
+                    console.log("Checking music status with ID:", data.music_id);
                     
-                    if (data.status === "completed" && data.music_url) {
-                        console.log("Music generation completed successfully");
+                    // Check if we need to authenticate
+                    if (authManager.isTokenExpired()) {
+                        console.log("Token expired, authenticating...");
+                        const authResult = await authManager.authenticate();
+                        if (!authResult.success) {
+                            throw new Error(`Authentication failed: ${authResult.error}`);
+                        }
+                    }
+                    
+                    // Get user ID and check premium status
+                    const userId = authManager.getUserId();
+                    if (!userId) {
+                        throw new Error("User ID not available. Please try logging in again.");
+                    }
+                    
+                    const checkQueueResponse = await fetch(`https://multiplewords.com/api/check_queue_music/${data.music_id}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        signal: currentGenerationController.signal
+                    });
+
+                    console.log("=== API Response Details ===");
+                    console.log("Response Status:", checkQueueResponse.status);
+                    console.log("Response Status Text:", checkQueueResponse.statusText);
+                    console.log("Response Headers:", Object.fromEntries([...checkQueueResponse.headers]));
+                    
+                    if (!checkQueueResponse.ok) {
+                        const errorText = await checkQueueResponse.text();
+                        console.error("Error Response Body:", errorText);
+                        throw new Error(`HTTP error! status: ${checkQueueResponse.status}, body: ${errorText}`);
+                    }
+
+                    const queueData = await checkQueueResponse.json();
+                    console.log("=== Queue Check Full Response ===");
+                    console.log("Response Data:", JSON.stringify(queueData, null, 2));
+                    console.log("Music URL:", queueData.music?.music_url);
+                    console.log("Music Status:", {
+                        id: queueData.music?.id,
+                        status: queueData.status,
+                        jobStatus: queueData.music?.job_status,
+                        isActive: queueData.music?.is_active,
+                        duration: queueData.music?.duration,
+                        position: queueData.position
+                    });
+
+                    if (queueData.status === 1 && queueData.music?.music_url) {
+                        console.log("Successfully received music URL:", queueData.music.music_url);
                         
-                        // Insert the music into the document
-                        await insertMusicToDocument(data.music_url);
+                        // Store the music details
+                        const musicDetails = {
+                            id: queueData.music.id,
+                            url: queueData.music.music_url,
+                            name: queueData.music.music_name,
+                            description: queueData.music.music_description,
+                            category: queueData.music.music_category_name,
+                            duration: queueData.music.duration,
+                            created_at: queueData.music.music_created_at
+                        };
+                        
+                        console.log("Music details:", musicDetails);
+
+                        // Insert music into PowerPoint
+                        if (Office.context.host === Office.HostType.PowerPoint) {
+                            try {
+                                // Add a new slide
+                                await PowerPoint.run(async (context) => {
+                                    const presentation = context.presentation;
+                                    const newSlide = presentation.slides.add();
+                                    
+                                    // Sync to ensure slide is created
+                                    await context.sync();
+                                    
+                                    // Add a title
+                                    const titleShape = newSlide.shapes.addTextBox("Generated Music", 100, 50, 500, 50);
+                                    titleShape.textFrame.textRange.font.size = 32;
+                                    titleShape.textFrame.textRange.font.bold = true;
+                                    
+                                    // Add music details
+                                    const detailsShape = newSlide.shapes.addTextBox(
+                                        `🎵 Name: ${musicDetails.name}\n` +
+                                        `Category: ${musicDetails.category}\n` +
+                                        `Duration: ${musicDetails.duration} seconds`,
+                                        100, 150, 500, 100
+                                    );
+
+                                    // Sync to ensure shapes are added
+                                    await context.sync();
+
+                                    // Insert audio using direct media insertion
+                                    return new Promise((resolve, reject) => {
+                                        // First ensure we're on the right slide
+                                        newSlide.load("id");
+                                        context.sync().then(() => {
+                                            // Select the slide where we want to insert the audio
+                                            Office.context.document.setSelectedDataAsync(
+                                                newSlide.id,
+                                                { coercionType: "SlideRange" },
+                                                (result) => {
+                                                    if (result.status === Office.AsyncResultStatus.Failed) {
+                                                        reject(new Error("Failed to select slide: " + result.error.message));
+                                                        return;
+                                                    }
+
+                                                    // Now insert the audio file
+                                                    const mediaData = {
+                                                        mediaType: "audio",
+                                                        fileName: musicDetails.name + ".mp3",
+                                                        url: musicDetails.url,
+                                                        autoPlay: false
+                                                    };
+
+                                                    Office.context.document.setSelectedDataAsync(
+                                                        mediaData,
+                                                        { coercionType: "Media" },
+                                                        async (mediaResult) => {
+                                                            if (mediaResult.status === Office.AsyncResultStatus.Failed) {
+                                                                reject(new Error("Failed to insert audio: " + mediaResult.error.message));
+                                                            } else {
+                                                                try {
+                                                                    // Add instructions text
+                                                                    const instructionsShape = newSlide.shapes.addTextBox(
+                                                                        "Click the speaker icon above to play/pause the music",
+                                                                        100, 400, 500, 30
+                                                                    );
+                                                                    instructionsShape.textFrame.textRange.font.color = "#666666";
+                                                                    instructionsShape.textFrame.textRange.font.italic = true;
+                                                                    
+                                                                    await context.sync();
+                                                                    resolve();
+                                                                } catch (error) {
+                                                                    reject(error);
+                                                                }
+                                                            }
+                                                        }
+                                                    );
+                                                }
+                                            );
+                                        }).catch(reject);
+                                    });
+                                });
+                                
+                                showSuccess("Music added to new slide successfully!");
+                            } catch (error) {
+                                console.error("Error inserting music into PowerPoint:", error);
+                                showError("Failed to add music to PowerPoint: " + error.message);
+                            }
+                        } else {
+                            showError("This feature is only available in PowerPoint");
+                        }
+                        
                         hideLoader();
-                        showSuccess("Music generated and inserted successfully!");
-                        clearInterval(checkInterval);
-                        return;
-                    } else if (data.status === "failed") {
-                        hideLoader();
-                        showError("Music generation failed. Please try again.");
-                        clearInterval(checkInterval);
-                        return;
+                        
+                        // Update token count after successful generation
+                        if (!isPremium) {
+                            console.log("Updating tokens after generation for non-premium user");
+                            checkTokens();
+                        }
+                    } else {
+                        // If music is not ready yet, retry after delay
+                        retryCount++;
+                        console.log(`Music not ready yet, retrying (Attempt ${retryCount})...`);
+                        showLoader(`Checking music status... Attempt ${retryCount}`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        return checkMusicStatus();
                     }
-                    // Continue checking if still processing
-                    console.log("Music still processing...");
                 } catch (error) {
-                    console.error("Error checking music status:", error);
-                    if (retryCount >= maxRetries) {
-                        hideLoader();
-                        showError("Failed to check music status. Please try again.");
-                        clearInterval(checkInterval);
-                        return;
-                    }
+                    // If error occurs, retry after delay
                     retryCount++;
+                    console.log(`Error checking music status, retrying (Attempt ${retryCount})...`, error);
+                    showLoader(`Retrying music status check... Attempt ${retryCount}`);
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    return checkMusicStatus();
                 }
             };
 
