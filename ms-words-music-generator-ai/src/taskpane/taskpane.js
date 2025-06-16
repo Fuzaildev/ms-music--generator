@@ -3,13 +3,15 @@
  * See LICENSE in the project root for license information.
  */
 
-/* global document, Office, Word */
+/* global document, Office, Word, Excel, PowerPoint */
 
 // Initialize auth manager
 let authManager = null;
 
 Office.onReady((info) => {
-  if (info.host === Office.HostType.Word) {
+  if (info.host === Office.HostType.Word || 
+      info.host === Office.HostType.Excel || 
+      info.host === Office.HostType.PowerPoint) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     
@@ -30,6 +32,51 @@ Office.onReady((info) => {
     document.getElementById("get-more-credits").onclick = getMoreCredits;
     document.getElementById("cancel-generation").onclick = cancelGeneration;
     document.getElementById("logoutButton").onclick = handleLogout;
+    document.getElementById("insert-music").onclick = insertMusicToDocument;
+
+    // Set up duration slider
+    const durationSlider = document.getElementById("duration-slider");
+    const durationInput = document.getElementById("duration-input");
+    
+    if (durationSlider && durationInput) {
+      // Update input when slider changes
+      durationSlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        durationInput.value = value;
+      });
+
+      // Update slider when input changes
+      durationInput.addEventListener('input', (e) => {
+        let value = parseInt(e.target.value);
+        
+        // Enforce min/max constraints
+        if (value < 1) value = 1;
+        if (value > 20) value = 20;
+        
+        durationSlider.value = value;
+        durationInput.value = value;
+      });
+
+      // Validate input on blur
+      durationInput.addEventListener('blur', (e) => {
+        let value = parseInt(e.target.value);
+        
+        // If empty or invalid, reset to default
+        if (isNaN(value) || value === '') {
+          value = 15;
+        }
+        
+        // Enforce min/max constraints
+        if (value < 1) value = 1;
+        if (value > 20) value = 20;
+        
+        durationSlider.value = value;
+        durationInput.value = value;
+      });
+
+      // Initialize with default value
+      durationInput.value = durationSlider.value;
+    }
 
     // Initial token check
     checkTokens();
@@ -332,32 +379,66 @@ function getPremiumPurchaseUrl(userId) {
     return `https://saifs.ai/canva_pricing/${userId}/16`;
 }
 
-// Update checkTokens function
+// Check tokens function for music generation
 async function checkTokens() {
   const tokenDisplay = document.getElementById("token-display");
   const generateButton = document.getElementById("run");
+  const creditsFooter = document.getElementById("credits-footer");
+
+  console.log("🔍 checkTokens called - DOM elements check:", {
+    tokenDisplay: !!tokenDisplay,
+    generateButton: !!generateButton,
+    creditsFooter: !!creditsFooter,
+    tokenDisplayElement: tokenDisplay,
+    currentTokenText: tokenDisplay?.textContent
+  });
 
   try {
     // Check authentication status first
     if (!authManager || authManager.isTokenExpired()) {
-      console.log("User is not authenticated. Skipping token check.");
-      tokenDisplay.textContent = "0";
-      tokenDisplay.classList.remove("premium");
-      generateButton.disabled = false;
-      generateButton.classList.remove('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Sign in to Generate Image";
+      console.log("User is not authenticated. Hiding credits footer.");
+      
+      // Hide the entire credits footer when not authenticated
+      if (creditsFooter) {
+        creditsFooter.style.display = "none";
+        console.log("✅ Credits footer hidden for non-authenticated user");
+      }
+      
+      // Clear token display when not authenticated
+      if (tokenDisplay) {
+        tokenDisplay.textContent = '';
+        tokenDisplay.classList.remove("premium");
+      }
+      
+      // Set appropriate button text for non-authenticated users
+      if (generateButton) {
+        const generateButtonLabel = generateButton.querySelector('.ms-Button-label');
+        generateButton.disabled = false;
+        generateButton.classList.remove('disabled');
+        generateButtonLabel.textContent = 'Sign in to Generate Music';
+      }
       return; // Exit the function early
+    }
+
+    // Show the credits footer when authenticated
+    if (creditsFooter) {
+      creditsFooter.style.display = "flex";
+      console.log("✅ Credits footer shown for authenticated user");
     }
 
     // Get user ID from auth manager only if authenticated
     const userId = authManager.getUserId();
     if (!userId) {
       console.warn("Authenticated user has no ID available. Check auth flow.");
-      tokenDisplay.textContent = "0";
-      tokenDisplay.classList.remove("premium");
-      generateButton.disabled = true;
-      generateButton.classList.add('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Error"; // Indicate an issue
+      if (tokenDisplay) {
+        tokenDisplay.textContent = "Error";
+        tokenDisplay.classList.remove("premium");
+      }
+      if (generateButton) {
+        generateButton.disabled = true;
+        generateButton.classList.add('disabled');
+        generateButton.querySelector(".ms-Button-label").textContent = "Authentication Error";
+      }
       return;
     }
 
@@ -385,32 +466,49 @@ async function checkTokens() {
     if (isPremium) {
       // Handle premium user
       console.log("Handling premium user display");
-      tokenDisplay.textContent = "∞";
-      tokenDisplay.classList.add("premium");
+      if (tokenDisplay) {
+        console.log("🔄 Setting token display to ∞ for premium user");
+        tokenDisplay.textContent = "∞";
+        tokenDisplay.classList.add("premium");
+        console.log("✅ Token display updated:", {
+          textContent: tokenDisplay.textContent,
+          classList: tokenDisplay.classList.toString(),
+          style: tokenDisplay.style.cssText
+        });
+      }
+      
       // Ensure button is enabled for premium users, regardless of token count
-      generateButton.disabled = false;
-      generateButton.classList.remove('disabled');
-      generateButton.querySelector(".ms-Button-label").textContent = "Generate Image";
+      if (generateButton) {
+        generateButton.disabled = false;
+        generateButton.classList.remove('disabled');
+        generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
+        console.log("✅ Generate button updated for premium user");
+      }
     } else {
       // Handle regular user
       const tokenCount = data.credits && typeof data.credits.videos !== 'undefined' ? data.credits.videos : 0;
       console.log("Regular user token count:", tokenCount);
-      tokenDisplay.textContent = tokenCount;
-      tokenDisplay.classList.remove("premium");
+      if (tokenDisplay) {
+        tokenDisplay.textContent = tokenCount;
+        tokenDisplay.classList.remove("premium");
+        console.log("✅ Token display updated for regular user:", tokenCount);
+      }
 
       // Disable/enable generate button based on token availability
       if (tokenCount <= 0) {
         console.log("No tokens available, disabling generate button");
-        generateButton.disabled = true;
-        generateButton.classList.add('disabled');
-        generateButton.querySelector(".ms-Button-label").textContent = "No Tokens Available";
-        // Don't show error here, just disable the button
-        // showError("You have no tokens left. Please get more credits to continue.");
+        if (generateButton) {
+          generateButton.disabled = true;
+          generateButton.classList.add('disabled');
+          generateButton.querySelector(".ms-Button-label").textContent = "No Credits Available";
+        }
       } else {
         console.log("Tokens available, enabling generate button");
-        generateButton.disabled = false;
-        generateButton.classList.remove('disabled');
-        generateButton.querySelector(".ms-Button-label").textContent = "Generate Image";
+        if (generateButton) {
+          generateButton.disabled = false;
+          generateButton.classList.remove('disabled');
+          generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
+        }
       }
     }
   } catch (error) {
@@ -419,12 +517,16 @@ async function checkTokens() {
       message: error.message,
       stack: error.stack
     });
-    tokenDisplay.textContent = "0";
-    tokenDisplay.classList.remove("premium");
+    if (tokenDisplay) {
+      tokenDisplay.textContent = "Error";
+      tokenDisplay.classList.remove("premium");
+    }
     // Disable button on error and show appropriate message
-    generateButton.disabled = true;
-    generateButton.classList.add('disabled');
-    generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Tokens";
+    if (generateButton) {
+      generateButton.disabled = true;
+      generateButton.classList.add('disabled');
+      generateButton.querySelector(".ms-Button-label").textContent = "Error Checking Credits";
+    }
   }
 }
 
@@ -445,7 +547,7 @@ async function cancelGeneration() {
   }
 }
 
-// Update generateImage function to handle login if not authenticated
+// Update generateImage function to handle music generation
 async function generateImage() {
   try {
     // Check if user is authenticated
@@ -460,13 +562,13 @@ async function generateImage() {
         return;
       }
       
-      // Authentication successful, continue with image generation
+      // Authentication successful, continue with music generation
       hideLoader();
       showSuccess("Authentication successful!");
       updateAuthUI(true);
     }
     
-    // Now proceed with image generation
+    // Now proceed with music generation
     const userId = authManager.getUserId();
     
     if (!userId) {
@@ -477,15 +579,16 @@ async function generateImage() {
     const isPremium = await checkPremiumStatus(userId);
     
     const promptText = document.querySelector(".input-field").value.trim();
-    const purposeSelect = document.getElementById("image-purpose-select");
+    const categorySelect = document.getElementById("music-category-select");
+    const duration = getDuration();
     
     if (!promptText) {
-      showError("Please enter a prompt for the image generation.");
+      showError("Please enter a prompt for the music generation.");
       return;
     }
 
-    if (!purposeSelect.value) {
-      showError("Please select an image purpose.");
+    if (!categorySelect.value) {
+      showError("Please select a music category.");
       return;
     }
 
@@ -518,63 +621,140 @@ async function generateImage() {
     }
 
     // Show loader and disable generate button
-    showLoader();
+    showLoader("Generating your music...");
     const generateButton = document.getElementById("run");
     generateButton.disabled = true;
 
     // Create AbortController for the request
     currentGenerationController = new AbortController();
 
-    // Create FormData for image generation
-    const imageFormData = new FormData();
-    imageFormData.append('isPro', isPremium ? '1' : '0');
-    imageFormData.append('user_id', userId);
-    imageFormData.append('prompt', promptText);
+    // Create FormData for music generation
+    const musicFormData = new FormData();
+    musicFormData.append('user_id', userId);
+    musicFormData.append('music_category_id', categorySelect.value);
+    musicFormData.append('music_description', promptText);
+    musicFormData.append('music_name', promptText.substring(0, 50)); // Use first 50 chars of prompt as name
+    musicFormData.append('reference_music_id', '1'); // Default reference music ID
 
-    console.log("Sending image generation request:", {
-      isPro: isPremium ? '1' : '0',
-      user_id: userId,
-      prompt: promptText,
-      endpoint: "https://shorts.multiplewords.com/mwvideos/api/generate_image"
+    // Log the request
+    console.log("Music generation request:", {
+        user_id: userId,
+        music_category_id: categorySelect.value,
+        music_description: promptText,
+        music_name: promptText.substring(0, 50),
+        reference_music_id: '1'
     });
 
-    const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/generate_image", {
-      method: "POST",
-      body: imageFormData,
-      signal: currentGenerationController.signal
-    });
+    try {
+        const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/music_prompt", {
+            method: "POST",
+            body: musicFormData,
+            signal: currentGenerationController.signal
+        });
 
-    console.log("Image generation response status:", response.status);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+        console.log("Music generation response status:", response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    const data = await response.json();
-    console.log("Image generation full response:", data);
+        const data = await response.json();
+        console.log("Music generation response:", data);
 
-    if (data.status === 1 && data.generated_image && data.generated_image.image_url) {
-      console.log("Successfully received image URL:", data.generated_image.image_url);
-      // Update loader message
-      showLoader("Inserting image into document...");
-      // Insert the generated image into the document
-      await insertImageToDocument(data.generated_image.image_url);
-      hideLoader();
-      showSuccess("Image generated and inserted successfully!");
-      // Update token count after successful generation
-      if (!isPremium) {
-        console.log("Updating tokens after generation for non-premium user");
-        checkTokens();
-      }
-    } else {
-      hideLoader();
-      console.error("Invalid API response:", {
-        status: data.status,
-        hasGeneratedImage: !!data.generated_image,
-        hasImageUrl: data.generated_image?.image_url
-      });
-      const errorMsg = data.msg || data.message || "Failed to generate image. Please try again.";
-      showError(errorMsg);
+        if (data.status === 1 && data.music_id) {
+            console.log("Successfully received music ID:", data.music_id);
+            
+            // Reduce token count immediately after successful API call for non-premium users
+            if (!isPremium) {
+                console.log("Reducing token count for non-premium user after successful API call");
+                try {
+                    // Get current token count
+                    const tokenResponse = await fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`, {
+                        method: "GET"
+                    });
+
+                    if (!tokenResponse.ok) {
+                        throw new Error(`Failed to get token count: ${tokenResponse.status}`);
+                    }
+
+                    const tokenData = await tokenResponse.json();
+                    console.log("Current token data:", tokenData);
+
+                    // Update token display
+                    const tokenDisplay = document.getElementById("token-display");
+                    const currentTokens = tokenData.credits?.videos || 0;
+                    tokenDisplay.textContent = currentTokens;
+                    console.log("Updated token count:", currentTokens);
+
+                    // Update generate button state if no tokens left
+                    const generateButton = document.getElementById("run");
+                    if (currentTokens <= 0) {
+                        generateButton.disabled = true;
+                        generateButton.classList.add('disabled');
+                        generateButton.querySelector(".ms-Button-label").textContent = "No Credits Available";
+                    }
+                } catch (error) {
+                    console.error("Error updating tokens:", error);
+                    // Don't block the music generation process if token update fails
+                    // Just log the error and continue
+                }
+            }
+            
+            // Update loader message
+            showLoader("Checking music generation status...");
+            
+            // Add retry logic for checking music status
+            let retryCount = 0;
+            const maxRetries = 15; // Increased max retries
+            const retryDelay = 5000; // Increased to 5 seconds
+            const maxRetryDelay = 15000; // Maximum delay of 15 seconds
+
+            const checkMusicStatus = async () => {
+                try {
+                    const response = await fetch(`https://multiplewords.com/api/check_queue_music/${data.music_id}`);
+                    const data = await response.json();
+                    
+                    if (data.status === "completed" && data.music_url) {
+                        console.log("Music generation completed successfully");
+                        
+                        // Insert the music into the document
+                        await insertMusicToDocument(data.music_url);
+                        hideLoader();
+                        showSuccess("Music generated and inserted successfully!");
+                        clearInterval(checkInterval);
+                        return;
+                    } else if (data.status === "failed") {
+                        hideLoader();
+                        showError("Music generation failed. Please try again.");
+                        clearInterval(checkInterval);
+                        return;
+                    }
+                    // Continue checking if still processing
+                    console.log("Music still processing...");
+                } catch (error) {
+                    console.error("Error checking music status:", error);
+                    if (retryCount >= maxRetries) {
+                        hideLoader();
+                        showError("Failed to check music status. Please try again.");
+                        clearInterval(checkInterval);
+                        return;
+                    }
+                    retryCount++;
+                }
+            };
+
+            // Start checking music status
+            await checkMusicStatus();
+        } else {
+            hideLoader();
+            console.error("Invalid API response:", data);
+            const errorMsg = data.msg || data.message || "Failed to generate music. Please try again.";
+            showError(errorMsg);
+        }
+    } catch (error) {
+        console.error("Error in music generation:", error);
+        hideLoader();
+        showError(error.message || "Failed to generate music. Please try again.");
     }
 
     // Reset button state
@@ -588,11 +768,11 @@ async function generateImage() {
     });
     hideLoader();
     
-    let errorMessage = "An error occurred while generating the image.";
+    let errorMessage = "An error occurred while generating the music.";
     if (error.name === 'AbortError') {
-      errorMessage = "Image generation was cancelled.";
+      errorMessage = "Music generation was cancelled.";
     } else if (error.message.includes("HTTP error")) {
-      errorMessage = "Failed to connect to the image generation service. Please try again later.";
+      errorMessage = "Failed to connect to the music generation service. Please try again later.";
     } else if (error.name === "TypeError" && error.message.includes("fetch")) {
       errorMessage = "Network error. Please check your internet connection.";
     }
@@ -607,32 +787,83 @@ async function generateImage() {
 
 async function insertImageToDocument(imageUrl) {
   try {
-    console.log("Starting image insertion for URL:", imageUrl);
-    await Word.run(async (context) => {
-      // Insert a paragraph at the end of the document
-      const paragraph = context.document.body.insertParagraph("", Word.InsertLocation.end);
-      
-      try {
-        // Get the image as base64
-        const imageContentBytes = await fetchImageAsBase64(imageUrl);
-        console.log("Image converted to base64 successfully");
-        
-        // Ensure we're at the end of the document
-        const range = context.document.body.getRange(Word.RangeLocation.end);
-        
-        // Insert the image at the range
-        range.insertInlinePictureFromBase64(imageContentBytes, Word.InsertLocation.after);
-        
-        await context.sync();
-        console.log("Image inserted successfully");
-      } catch (error) {
-        console.error("Error inserting image:", error);
-        throw error;
-      }
+    const base64Image = await fetchImageAsBase64(imageUrl);
+    
+    return new Promise((resolve, reject) => {
+      Office.onReady((info) => {
+        try {
+          switch (info.host) {
+            case Office.HostType.Word:
+              Word.run(async (context) => {
+                const range = context.document.getSelection();
+                range.insertInlinePictureFromBase64(base64Image, "Replace");
+                await context.sync();
+                resolve();
+              });
+              break;
+              
+            case Office.HostType.Excel:
+              Excel.run(async (context) => {
+                const range = context.workbook.getSelectedRange();
+                const shape = range.worksheet.shapes.addImage(base64Image);
+                shape.width = 300; // Set default width
+                shape.height = 300; // Set default height
+                await context.sync();
+                resolve();
+              });
+              break;
+              
+            case Office.HostType.PowerPoint:
+              // Use setSelectedDataAsync for PowerPoint
+              Office.context.document.setSelectedDataAsync(base64Image, {
+                coercionType: Office.CoercionType.Image,
+                imageLeft: 100,    // Position from the left in points
+                imageTop: 100,     // Position from the top in points
+                imageWidth: 300,   // Width in points
+                imageHeight: 300   // Height in points
+              }, function(asyncResult) {
+                if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                  console.log('Image inserted successfully in PowerPoint');
+                  resolve();
+                } else {
+                  console.error('Failed to insert image in PowerPoint:', asyncResult.error.message);
+                  reject(new Error(asyncResult.error.message));
+                }
+              });
+              break;
+              
+            default:
+              reject(new Error("Unsupported Office application"));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      });
     });
   } catch (error) {
-    console.error("Error in insertImageToDocument:", error);
-    throw new Error("Failed to insert the image into the document: " + error.message);
+    console.error("Error inserting image:", error);
+    throw error;
+  }
+}
+
+// Helper function to create a temporary file from base64
+async function createTempFileFromBase64(base64Data) {
+  try {
+    // Convert base64 to blob
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'image/png' });
+
+    // Create a temporary file
+    const tempFile = new File([blob], 'temp_image.png', { type: 'image/png' });
+    return tempFile;
+  } catch (error) {
+    console.error("Error creating temporary file:", error);
+    throw error;
   }
 }
 
@@ -676,14 +907,11 @@ async function fetchImageAsBase64(imageUrl) {
   }
 }
 
-// Update enhancePrompt function to use authentication
+// Update enhancePrompt function to use the new API endpoint and parameters
 async function enhancePrompt() {
   try {
-
-    
     const textarea = document.querySelector(".input-field");
     const currentPrompt = textarea.value.trim();
-    const purposeSelect = document.getElementById("image-purpose-select");
     
     if (!currentPrompt) {
       showError("Please enter a basic prompt first.");
@@ -698,30 +926,52 @@ async function enhancePrompt() {
 
     // Create FormData for the API request
     const formData = new FormData();
-    formData.append('prompt', currentPrompt);
+    formData.append('music_description', currentPrompt);
 
-    // Make the API call
-    const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/enhance_ai_image_prompt", {
-      method: "POST",
-      body: formData
+    console.log('Sending request to enhance prompt:', {
+      url: "https://shorts.multiplewords.com/mwvideos/api/enhance_prompt",
+      prompt: currentPrompt
     });
 
+    // Make the API call
+    const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/enhance_prompt", {
+      method: "POST",
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    // Log the raw response
+    console.log('Raw response:', response);
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('API Response data:', data);
     
-    if (data.status === "success" && data.enhanced_prompt) {
-      textarea.value = data.enhanced_prompt;
+    // Check for enhanced_prompt in different possible locations in the response
+    const enhancedPrompt = data.enhanced_prompt || data.data?.enhanced_prompt || data.result?.enhanced_prompt;
+    
+    if (enhancedPrompt) {
+      textarea.value = enhancedPrompt;
       showSuccess("Prompt enhanced successfully!");
     } else {
-      throw new Error("Failed to enhance prompt");
+      console.error('Unexpected API response format:', data);
+      throw new Error("Failed to enhance prompt: No enhanced prompt in response");
     }
 
   } catch (error) {
     console.error("Error in enhancePrompt:", error);
-    showError(`Error: ${error.message}`);
+    showError(`Error enhancing prompt: ${error.message}`);
   } finally {
     // Reset the enhance button state
     const enhanceButton = document.querySelector(".enhance-button");
@@ -908,4 +1158,76 @@ function handleLogout() {
   authManager.logout();
   updateAuthUI(false);
   showSuccess("Logged out successfully");
+}
+
+// Get duration value function
+function getDuration() {
+  const durationSlider = document.getElementById("duration-slider");
+  return parseInt(durationSlider.value);
+}
+
+// Function to insert music into the document
+async function insertMusicToDocument() {
+    try {
+        const player = document.getElementById('music-player');
+        const musicUrl = player.src;
+        
+        if (!musicUrl) {
+            showError("No music available to insert");
+            return;
+        }
+
+        showLoader("Inserting music into document...");
+
+        await Office.onReady();
+        
+        // Handle different Office applications
+        switch (Office.context.host) {
+            case Office.HostType.Word:
+                await Word.run(async (context) => {
+                    const range = context.document.getSelection();
+                    const paragraph = range.insertParagraph("", "After");
+                    
+                    // Insert an audio icon or placeholder
+                    paragraph.insertHtml(
+                        `<p>🎵 Audio: <a href="${musicUrl}" target="_blank">Click to play</a></p>`,
+                        "Replace"
+                    );
+                    
+                    await context.sync();
+                });
+                break;
+
+            case Office.HostType.PowerPoint:
+                // For PowerPoint, we'll add a shape with a link
+                const audioShape = {
+                    type: "Text",
+                    text: "🎵 Click to play audio",
+                    hyperlink: musicUrl,
+                    width: 200,
+                    height: 50
+                };
+                
+                Office.context.document.setSelectedDataAsync(
+                    audioShape,
+                    { coercionType: Office.CoercionType.Text },
+                    (result) => {
+                        if (result.status === Office.AsyncResultStatus.Failed) {
+                            throw new Error(result.error.message);
+                        }
+                    }
+                );
+                break;
+
+            default:
+                throw new Error("This Office application is not supported for music insertion");
+        }
+
+        hideLoader();
+        showSuccess("Music inserted successfully!");
+    } catch (error) {
+        console.error("Error inserting music:", error);
+        hideLoader();
+        showError("Failed to insert music: " + error.message);
+    }
 }

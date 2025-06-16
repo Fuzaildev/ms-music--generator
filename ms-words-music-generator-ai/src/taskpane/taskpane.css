@@ -29,11 +29,11 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: transparent;
-    /* Lighten border or remove if background is white */
-    border-bottom: 1px solid #F3F4F6; 
+    background: #ffffff;
+    color: #323130;
     flex-shrink: 0;
     margin-bottom: 0;
+    border-bottom: 1px solid #EDEBE9;
  }
 
  .header-top {
@@ -426,33 +426,19 @@ textarea.input-field::placeholder {
 /* Improved logout button styles */
 #logoutButton {
     background: transparent;
-    border: 1px solid #0078D4;
-    color: #0078D4;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
+    border: none;
+    color: #323130;
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    padding: 4px;
 }
 
 #logoutButton:hover {
-    background: #f0f8ff;
-    border-color: #005A9E;
-    color: #005A9E;
+    background: rgba(0, 0, 0, 0.05);
 }
 
-#logoutButton:active {
-    background: #deecf9;
-    transform: scale(0.98);
-}
-
-#logoutButton.ms-Button--small .ms-Button-label {
-    color: inherit;
-    font-weight: inherit;
+.ms-Button-icon {
+    font-size: 20px;
+    color: #323130;
 }
 
 /* Enhanced authentication loading styles */
@@ -643,4 +629,119 @@ textarea.input-field::placeholder {
 /* Style for premium token display */
 #token-display.premium {
     font-weight: 600;
+}
+
+/* Slider styles */
+.slider-wrapper {
+    margin-bottom: 16px;
+    padding: 0 4px;
+}
+
+.slider-wrapper .ms-Label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #323130;
+}
+
+.ms-Slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: #edebe9;
+    outline: none;
+    border-radius: 2px;
+    margin: 10px 0;
+}
+
+.ms-Slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ms-Slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#duration-value {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 14px;
+    color: #323130;
+    font-weight: 600;
+}
+
+/* Duration controls styling */
+.duration-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.ms-Slider {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    background: #edebe9;
+    border-radius: 2px;
+    outline: none;
+}
+
+.ms-Slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ms-Slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#duration-input {
+    width: 60px;
+    height: 32px;
+    padding: 4px 8px;
+    border: 1px solid #8a8886;
+    border-radius: 2px;
+    font-size: 14px;
+    color: #323130;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#duration-input::-webkit-outer-spin-button,
+#duration-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#duration-input:focus {
+    border-color: #0078D4;
+    outline: none;
 }

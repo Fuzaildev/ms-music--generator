@@ -1,0 +1,866 @@
+/* 
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+ html,
+ body {
+     width: 100%;
+     height: 100%;
+     margin: 0;
+     padding: 0;
+     font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+     background: #FFFFFF; 
+     /* Ensure default text color is dark */
+     color: #323130; 
+     /* Remove flex from body to allow scrolling */
+     overflow-x: hidden;
+     overflow-y: auto;
+ }
+ 
+ ul {
+     margin: 0;
+     padding: 0;
+ }
+ 
+ .ms-welcome__header {
+    padding: 16px 24px 12px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: transparent;
+    /* Lighten border or remove if background is white */
+    border-bottom: 1px solid #F3F4F6; 
+    flex-shrink: 0;
+    margin-bottom: 0;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+ }
+
+ .header-top {
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 6px;
+ }
+
+ .header-top h1 {
+    margin: 0;
+ }
+
+ .ms-welcome__header h1 {
+    /* Slightly smaller, standard weight */
+    font-size: 24px; 
+    line-height: 1.2;
+    font-weight: 600; /* Semibold */
+    color: #1f4e7a; /* Use a Fluent UI theme color */
+    text-align: left;
+    max-width: 100%; /* Allow full width */
+ }
+
+ .ms-welcome__header p {
+    margin: 4px 0;
+    font-size: 14px; 
+    line-height: 1.5;
+    color: #605E5C; 
+    text-align: left;
+    max-width: 100%;
+    /* Add a little space above the paragraph */
+    margin-top: 4px;
+ }
+
+ .value-proposition {
+    margin: 6px 0 4px 0 !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    color: #323130 !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+ }
+
+ .account-benefits {
+    margin: 4px 0 6px 0 !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    color: #0078D4 !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+ }
+
+ #auth-status {
+    display: none;
+ }
+
+ #auth-status.authenticated {
+    display: none;
+ }
+
+ #auth-status.not-authenticated {
+    display: none;
+ }
+
+ .ms-welcome__main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 24px 60px 24px; /* Reduced top padding */
+    width: 100%;
+    box-sizing: border-box;
+    min-height: calc(100vh - 100px); /* Reduced header space calculation */
+    position: relative;
+ }
+
+ /* Upload Area Styles - Make more compact */
+ .upload-area {
+    width: 100%;
+    min-height: 100px; /* Reduced height */
+    border: 2px dashed #C8C6C4;
+    border-radius: 4px;
+    background: #FAFAFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 12px; /* Reduced margin */
+    position: relative;
+ }
+
+ .upload-area:hover {
+    border-color: #0078D4;
+    background: #F3F9FF;
+ }
+
+ .upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px; /* Reduced padding */
+ }
+
+ .upload-icon {
+    font-size: 28px; /* Slightly smaller */
+    margin-bottom: 6px; /* Reduced margin */
+    opacity: 0.8;
+ }
+
+ .upload-text {
+    font-size: 13px; /* Smaller text */
+    color: #605E5C;
+    font-weight: 400;
+ }
+
+ /* Image preview styles */
+ .upload-content img {
+    max-width: 100%;
+    max-height: 80px;
+    border-radius: 4px;
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+ }
+
+ .upload-content img:hover {
+    transform: scale(1.02);
+ }
+
+ /* Clear Upload Button */
+ .clear-upload-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: #D13438;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    z-index: 10;
+ }
+
+ .clear-upload-btn:hover {
+    background: #A4262C;
+    transform: scale(1.1);
+ }
+
+ .clear-upload-btn span {
+    line-height: 1;
+    pointer-events: none;
+ }
+
+ /* Get Image from Document Button - More compact */
+ .get-image-button {
+    width: 100%;
+    padding: 6px 12px; /* Reduced padding */
+    margin-bottom: 12px; /* Reduced margin */
+    border-radius: 2px;
+    background: #FFFFFF;
+    border: 1px solid #C8C6C4;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+ }
+
+ .get-image-button .ms-Button-label {
+    color: #323130;
+    font-weight: 400;
+    font-size: 13px; /* Smaller text */
+    line-height: 1;
+    display: block;
+ }
+
+ .get-image-button:hover {
+    background: #F3F4F6;
+    border-color: #A19F9D;
+ }
+
+ .input-wrapper {
+    width: 100%;
+    position: relative;
+    margin-bottom: 12px; /* Reduced margin */
+ }
+
+ /* Combined styles for textarea and input - More compact */
+ .input-field {
+    width: 100%;
+    min-height: 50px; /* Reduced height */
+    max-height: 80px; /* Reduced max height */
+    resize: none;
+    /* Adjusted padding */
+    padding: 10px; /* Reduced padding */
+    font-size: 13px; /* Smaller text */
+    /* Standard Fluent UI input border */
+    border: 1px solid #C8C6C4; 
+    /* Subtle border radius */
+    border-radius: 4px; 
+    background: #FFFFFF;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: none; 
+ }
+ 
+ /* Specific style for textarea */
+ textarea.input-field {
+    /* Ensure consistent line height */
+    line-height: 1.4; /* Reduced line height */
+    /* Allow vertical resize, prevent horizontal */
+    resize: vertical;
+    min-height: 50px; /* Reduced minimum height */
+ }
+ 
+ .input-field:focus {
+    outline: none;
+    /* Fluent UI focus border color */
+    border-color: #0078D4; 
+    /* Remove box-shadow, rely on border */
+    box-shadow: none; 
+ }
+ 
+ #run.ms-welcome__action.ms-Button--hero {
+    width: 100%;
+    padding: 10px; /* Reduced padding */
+    margin: 6px 0 12px 0; /* Reduced margins */
+    border-radius: 4px;
+    background: #0078D4;
+    border: 1px solid #0078D4;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+ }
+
+#run.ms-Button--hero .ms-Button-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    display: block;
+    pointer-events: none;
+}
+
+.ms-Button.ms-Button--hero:hover {
+    /* Standard Fluent UI hover blue */
+    background: #005A9E; 
+    border-color: #005A9E;
+    /* Remove transform/shadow for standard feel */
+    transform: none; 
+    box-shadow: none; 
+}
+
+.ms-Button.ms-Button--hero.disabled {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ms-Button.ms-Button--hero.disabled:hover {
+    background: #F3F2F1;
+}
+
+.ms-Button.ms-Button--hero.disabled .ms-Button-label {
+    color: #A19F9D;
+}
+
+#sideload-msg {
+    display: none;
+}
+
+.ms-welcome__features {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+.ms-welcome__features.ms-List .ms-ListItem {
+    padding-bottom: 20px;
+    display: list-item;
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: auto;
+    overflow: visible;
+}
+
+b {
+    font-weight: 600;
+}
+
+.dropdown-wrapper {
+    margin-bottom: 16px;
+}
+
+.dropdown-wrapper .ms-Label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #323130;
+}
+
+.dropdown-field {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #C8C6C4;
+    border-radius: 2px;
+    background: #FFFFFF;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: none;
+    color: #323130;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='5'><path fill='%23666' d='m0 0h4l-2 5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+}
+
+.dropdown-field:focus {
+    outline: none;
+    border-color: #0078D4;
+    box-shadow: none;
+}
+
+textarea.input-field::placeholder {
+    color: #A19F9D;
+}
+
+.notification {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0078D4;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: top 0.3s ease;
+    max-width: calc(100% - 32px);
+    text-align: center;
+}
+
+.notification.show {
+    top: 16px;
+    animation: slideDown 0.3s ease;
+}
+
+.notification.error {
+    background: #D13438;
+    color: white;
+}
+
+.notification.success {
+    background: #107C10;
+    color: white;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 16px;
+        opacity: 1;
+    }
+}
+
+.ms-Button.ms-Button--credits,
+.ms-Button.ms-Button--small {
+    background: transparent;
+    border: 1px solid #C8C6C4;
+    color: #323130;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loader-container.active {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0078D4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loader-text {
+    font-size: 16px;
+    color: #323130;
+    margin-bottom: 24px;
+}
+
+.ms-Button.ms-Button--danger {
+    background: #D13438;
+    border: 1px solid #D13438;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ms-Button.ms-Button--danger:hover {
+    background: #A4262C;
+    border-color: #A4262C;
+}
+
+.ms-Button.ms-Button--danger:active {
+    background: #8B1A1F;
+}
+
+.ms-Button.ms-Button--danger .ms-Button-label {
+    color: white;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.auth-section {
+    display: none;
+}
+
+.auth-section {
+    margin-bottom: 20px;
+}
+
+#auth-status {
+    margin-bottom: 16px;
+    padding: 8px;
+    border-radius: 2px;
+}
+
+#auth-status.authenticated {
+    background: #DFF6DD;
+    color: #107C10;
+    border: 1px solid #107C10;
+}
+
+#auth-status.not-authenticated {
+    background: #FDE7E9;
+    color: #D13438;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+#logoutButton {
+    background: transparent;
+    border: none;
+    color: #605E5C;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+}
+
+#logoutButton:hover {
+    background: #F3F4F6;
+    color: #323130;
+}
+
+#logoutButton:active {
+    background: #EDEBE9;
+    color: #323130;
+}
+
+#logoutButton.ms-Button--small .ms-Button-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: inherit;
+}
+
+.auth-loading-content {
+    display: none;
+    text-align: center;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.auth-loading-step {
+    display: none;
+    margin-bottom: 24px;
+}
+
+.auth-loading-step.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.auth-loading-step h3 {
+    font-size: 18px;
+    color: #323130;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.auth-loading-step p {
+    font-size: 14px;
+    color: #605E5C;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.auth-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #C8C6C4;
+    transition: background 0.3s ease;
+}
+
+.auth-progress-dot.active {
+    background: #0078D4;
+}
+
+.loader-container.active .loader-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.credits-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #FAFAFA !important;
+    border-top: 1px solid #EDEBE9 !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    z-index: 100 !important;
+    color: #605E5C !important;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.06) !important;
+    font-size: 13px !important;
+    min-height: 44px !important;
+    margin-top: auto !important;
+}
+
+.ms-Button--icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.ms-Button--icon:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.ms-Button-icon {
+    font-size: 16px;
+    line-height: 1;
+    color: #605E5C;
+    pointer-events: none;
+}
+
+.credits-display {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    font-size: 13px !important;
+    color: #605E5C !important;
+    font-weight: 400 !important;
+}
+
+.credits-display span {
+    font-weight: 400 !important;
+    color: #605E5C !important;
+}
+
+#token-display {
+    font-weight: 600 !important;
+    color: #0078D4 !important;
+    background: #F3F9FF !important;
+    padding: 4px 8px !important;
+    border-radius: 3px !important;
+    border: 1px solid #C7E0F4 !important;
+    min-width: 24px !important;
+    text-align: center !important;
+    font-size: 13px !important;
+}
+
+#token-display.premium {
+    color: #107C10 !important;
+    background: #F3F9DD !important;
+    border: 1px solid #C4E1C5 !important;
+}
+
+#get-more-credits.ms-Button {
+    background: #0078D4 !important;
+    border: 1px solid #0078D4 !important;
+    color: #FFFFFF !important;
+    padding: 6px 12px !important;
+    border-radius: 3px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    height: 28px !important;
+    white-space: nowrap !important;
+}
+
+#get-more-credits.ms-Button:hover {
+    background: #005A9E !important;
+    border-color: #005A9E !important;
+    transform: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+#get-more-credits.ms-Button:active {
+    background: #004578 !important;
+    border-color: #004578 !important;
+}
+
+#get-more-credits.ms-Button .ms-Button-label {
+    color: #FFFFFF !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+#get-more-credits.ms-Button.disabled,
+#get-more-credits.ms-Button.disabled:hover {
+    background: #F3F2F1 !important;
+    border-color: #EDEBE9 !important;
+    color: #A19F9D !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+#get-more-credits.ms-Button.disabled:hover,
+#get-more-credits.ms-Button.disabled:active {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Responsive adjustments for better scrolling */
+@media (max-height: 600px) {
+    .ms-welcome__main {
+        min-height: auto;
+        padding: 8px 24px 50px 24px; /* Further reduced padding */
+    }
+    
+    .ms-welcome__header {
+        padding: 12px 24px 8px 24px; /* Reduced header padding */
+    }
+    
+    .value-proposition,
+    .account-benefits {
+        font-size: 12px !important;
+        line-height: 1.2 !important;
+        margin: 3px 0 !important;
+    }
+    
+    .upload-area {
+        min-height: 80px; /* Even smaller upload area */
+        margin-bottom: 8px;
+    }
+    
+    .upload-content {
+        padding: 12px;
+    }
+    
+    .upload-icon {
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+    
+    .input-field {
+        min-height: 40px;
+        max-height: 60px;
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .get-image-button {
+        padding: 4px 8px;
+        margin-bottom: 8px;
+    }
+    
+    #run.ms-welcome__action.ms-Button--hero {
+        padding: 8px !important;
+        margin: 4px 0 8px 0 !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .ms-welcome__main {
+        padding: 8px 16px 50px 16px;
+    }
+    
+    .ms-welcome__header {
+        padding: 10px 16px 6px 16px;
+    }
+    
+    .input-field {
+        min-height: 40px;
+    }
+    
+    .value-proposition {
+        font-size: 12px !important;
+    }
+}
+
+/* Ensure first-time user experience fits on one page */
+@media (max-height: 500px) {
+    .ms-welcome__header {
+        padding: 8px 24px 6px 24px;
+    }
+    
+    .ms-welcome__main {
+        padding: 6px 24px 40px 24px;
+    }
+    
+    .upload-area {
+        min-height: 70px;
+        margin-bottom: 6px;
+    }
+    
+    .input-wrapper {
+        margin-bottom: 8px;
+    }
+    
+    .get-image-button {
+        margin-bottom: 6px;
+        padding: 3px 8px;
+    }
+    
+    .input-field {
+        min-height: 35px;
+        max-height: 50px;
+        padding: 6px;
+    }
+}
+
+/* Ensure proper scrolling behavior */
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    scroll-behavior: smooth;
+}
