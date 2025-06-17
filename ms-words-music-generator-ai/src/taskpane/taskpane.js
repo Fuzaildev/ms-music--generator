@@ -3,15 +3,13 @@
  * See LICENSE in the project root for license information.
  */
 
-/* global document, Office, Word, Excel, PowerPoint */
+/* global document, Office, PowerPoint */
 
 // Initialize auth manager
 let authManager = null;
 
 Office.onReady((info) => {
-  if (info.host === Office.HostType.Word || 
-      info.host === Office.HostType.Excel || 
-      info.host === Office.HostType.PowerPoint) {
+  if (info.host === Office.HostType.PowerPoint) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
     
@@ -98,20 +96,16 @@ Office.onReady((info) => {
 
 // Check authentication status
 function checkAuthStatus() {
-  console.log("Checking authentication status");
   if (!authManager) {
-    console.error("Auth manager not initialized");
     return;
   }
   
   const isAuthenticated = !authManager.isTokenExpired();
-  console.log("Authentication status:", isAuthenticated);
   updateAuthUI(isAuthenticated);
 }
 
 // Update authentication UI
 function updateAuthUI(isAuthenticated) {
-  console.log("Updating UI for authentication status:", isAuthenticated);
   const logoutButton = document.getElementById('logoutButton');
   const runButton = document.getElementById('run');
   const enhanceButton = document.querySelector('.enhance-button');
@@ -142,26 +136,20 @@ let currentAuthProcess = null;
 
 // Handle login
 async function handleLogin() {
-  console.log("Login button clicked");
   try {
     showLoader("Authenticating...", false);
-    console.log("Starting authentication process");
     
     // Store the authentication promise
     currentAuthProcess = authManager.authenticate();
     const result = await currentAuthProcess;
     currentAuthProcess = null;
     
-    console.log("Authentication result:", result);
-    
     if (result.success) {
-      console.log("Authentication successful");
       showSuccess("Authentication successful!");
       updateAuthUI(true);
     } else {
       // Provide more specific error messages based on the error type
       let errorMessage = result.error;
-      console.error("Authentication failed:", errorMessage);
       
       if (errorMessage.includes("Popup was blocked")) {
         errorMessage = "Your browser blocked the authentication popup. Please follow the instructions in the modal.";
@@ -177,7 +165,6 @@ async function handleLogin() {
       updateAuthUI(false);
     }
   } catch (error) {
-    console.error("Login error:", error);
     showError(`Error: ${error.message}`);
     updateAuthUI(false);
   } finally {
@@ -189,7 +176,6 @@ async function handleLogin() {
 
 // Add cancel authentication function
 async function cancelAuthentication() {
-  console.log("Cancelling authentication process");
   if (authManager) {
     authManager.cancelAuth();
   }
@@ -203,7 +189,6 @@ async function cancelAuthentication() {
 
 // Add cancel credits dialog function
 async function cancelCreditsDialog() {
-  console.log("Cancelling credits dialog");
   hideLoader();
   showNotification("Purchase cancelled.", "info");
 }
@@ -279,7 +264,6 @@ function startAuthLoadingAnimation() {
         if (window.authLoadingInterval) {
           clearInterval(window.authLoadingInterval);
           window.authLoadingInterval = null;
-          console.log("Auth animation finished and stopped.");
         }
       }
     } else {
@@ -350,11 +334,9 @@ async function checkPremiumStatus(userId) {
             throw new Error('User ID is required');
         }
         
-        console.log('🔍 Checking premium status for user:', userId);
         const response = await fetch(`https://multiplewords.com/api/account/user_settings/${userId}`);
 
         if (!response.ok) {
-            console.error('❌ Failed to get premium status:', response.status, response.statusText);
             throw new Error(`Failed to get premium status: ${response.status}`);
         }
 
@@ -362,10 +344,8 @@ async function checkPremiumStatus(userId) {
         const userRecord = data?.user_info?.find(user => user.user_id === parseInt(userId));
         const isPremium = userRecord?.is_user_paid || false;
 
-        console.log('✅ Premium status retrieved successfully:', isPremium);
         return isPremium;
     } catch (error) {
-        console.error('❌ Error checking premium status:', error);
         throw error;
     }
 }
@@ -387,7 +367,6 @@ async function checkTokens() {
   try {
     // Check authentication status first
     if (!authManager || authManager.isTokenExpired()) {
-      console.log("User is not authenticated. Skipping token check.");
       tokenDisplay.textContent = "0";
       tokenDisplay.classList.remove("premium");
       generateButton.disabled = false;
@@ -399,7 +378,6 @@ async function checkTokens() {
     // Get user ID from auth manager only if authenticated
     const userId = authManager.getUserId();
     if (!userId) {
-      console.warn("Authenticated user has no ID available. Check auth flow.");
       tokenDisplay.textContent = "0";
       tokenDisplay.classList.remove("premium");
       generateButton.disabled = true;
@@ -408,8 +386,6 @@ async function checkTokens() {
       return;
     }
 
-    console.log("Checking tokens for authenticated user:", userId);
-
     // First check premium status
     const isPremium = await checkPremiumStatus(userId);
 
@@ -417,21 +393,14 @@ async function checkTokens() {
       method: "GET"
     });
 
-    console.log("Token check API response status:", response.status);
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Token check full response:", data);
-    console.log("Credits object:", data.credits);
-
-    console.log("Is premium user?", isPremium);
-
+    
     if (isPremium) {
       // Handle premium user
-      console.log("Handling premium user display");
       tokenDisplay.textContent = "∞";
       tokenDisplay.classList.add("premium");
       // Ensure button is enabled for premium users, regardless of token count
@@ -441,31 +410,23 @@ async function checkTokens() {
     } else {
       // Handle regular user
       const tokenCount = data.credits && typeof data.credits.videos !== 'undefined' ? data.credits.videos : 0;
-      console.log("Regular user token count:", tokenCount);
       tokenDisplay.textContent = tokenCount;
       tokenDisplay.classList.remove("premium");
 
       // Disable/enable generate button based on token availability
       if (tokenCount <= 0) {
-        console.log("No tokens available, disabling generate button");
         generateButton.disabled = true;
         generateButton.classList.add('disabled');
         generateButton.querySelector(".ms-Button-label").textContent = "No Tokens Available";
         // Don't show error here, just disable the button
         // showError("You have no tokens left. Please get more credits to continue.");
       } else {
-        console.log("Tokens available, enabling generate button");
         generateButton.disabled = false;
         generateButton.classList.remove('disabled');
         generateButton.querySelector(".ms-Button-label").textContent = "Generate Music";
       }
     }
   } catch (error) {
-    console.error("Detailed error in checkTokens:", {
-      error: error,
-      message: error.message,
-      stack: error.stack
-    });
     tokenDisplay.textContent = "0";
     tokenDisplay.classList.remove("premium");
     // Disable button on error and show appropriate message
@@ -538,29 +499,18 @@ async function generateImage() {
     }
 
     // Check tokens before generating
-    console.log("Checking tokens before generation for user:", userId);
     
     const tokenResponse = await fetch(`https://shorts.multiplewords.com/api/tokens_left/get/${userId}`, {
       method: "GET"
     });
-
-    console.log("Pre-generation token check status:", tokenResponse.status);
 
     if (!tokenResponse.ok) {
       throw new Error(`HTTP error! status: ${tokenResponse.status}`);
     }
 
     const tokenData = await tokenResponse.json();
-    console.log("Pre-generation token check response:", tokenData);
-    
-    console.log("User premium status:", isPremium);
-    console.log("Available video tokens:", tokenData.credits?.videos);
     
     if (!isPremium && (!tokenData.credits || !tokenData.credits.videos || tokenData.credits.videos < 1)) {
-      console.log("Token check failed:", {
-        hasCredits: !!tokenData.credits,
-        videoTokens: tokenData.credits?.videos
-      });
       showError("Insufficient tokens. Please get more credits to continue.");
       return;
     }
@@ -592,17 +542,6 @@ async function generateImage() {
     musicFormData.append('isPro', 'true');
     musicFormData.append('isProSuper', isUserPaid ? 'true' : 'false');
 
-    // Log the request
-    console.log("Music generation request:", {
-      user_id: userId,
-        music_category_id: categorySelect.value,
-        music_description: promptText,
-        music_name: promptText.substring(0, 50),
-        reference_music_id: '1',
-        isPro: true,
-        isProSuper: isUserPaid
-    });
-
     try {
         const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/music_prompt", {
       method: "POST",
@@ -610,19 +549,13 @@ async function generateImage() {
       signal: currentGenerationController.signal
     });
 
-        console.log("Music generation response status:", response.status);
-    
-    if (!response.ok) {
+        if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-        console.log("Music generation response:", data);
 
         if (data.status === 1 && data.music_id) {
-            console.log("Successfully received music ID:", data.music_id);
-            
-      // Update loader message
             showLoader("Checking music generation status...");
             
             // Add retry logic for checking music status - infinite retries
@@ -632,11 +565,9 @@ async function generateImage() {
             const checkMusicStatus = async () => {
                 try {
                     // Call the check_queue_music API with the correct endpoint
-                    console.log("Checking music status with ID:", data.music_id);
                     
                     // Check if we need to authenticate
                     if (authManager.isTokenExpired()) {
-                        console.log("Token expired, authenticating...");
                         const authResult = await authManager.authenticate();
                         if (!authResult.success) {
                             throw new Error(`Authentication failed: ${authResult.error}`);
@@ -657,33 +588,14 @@ async function generateImage() {
                         signal: currentGenerationController.signal
                     });
 
-                    console.log("=== API Response Details ===");
-                    console.log("Response Status:", checkQueueResponse.status);
-                    console.log("Response Status Text:", checkQueueResponse.statusText);
-                    console.log("Response Headers:", Object.fromEntries([...checkQueueResponse.headers]));
-                    
                     if (!checkQueueResponse.ok) {
                         const errorText = await checkQueueResponse.text();
-                        console.error("Error Response Body:", errorText);
                         throw new Error(`HTTP error! status: ${checkQueueResponse.status}, body: ${errorText}`);
                     }
 
                     const queueData = await checkQueueResponse.json();
-                    console.log("=== Queue Check Full Response ===");
-                    console.log("Response Data:", JSON.stringify(queueData, null, 2));
-                    console.log("Music URL:", queueData.music?.music_url);
-                    console.log("Music Status:", {
-                        id: queueData.music?.id,
-                        status: queueData.status,
-                        jobStatus: queueData.music?.job_status,
-                        isActive: queueData.music?.is_active,
-                        duration: queueData.music?.duration,
-                        position: queueData.position
-                    });
 
                     if (queueData.status === 1 && queueData.music?.music_url) {
-                        console.log("Successfully received music URL:", queueData.music.music_url);
-                        
                         // Store the music details
                         const musicDetails = {
                             id: queueData.music.id,
@@ -695,8 +607,6 @@ async function generateImage() {
                             created_at: queueData.music.music_created_at
                         };
                         
-                        console.log("Music details:", musicDetails);
-
                         // === Show and update the music player UI ===
                         const playerContainer = document.getElementById('music-player-container');
                         const player = document.getElementById('music-player');
@@ -720,7 +630,6 @@ async function generateImage() {
                                 
                                 showSuccess("Music added to slide successfully!");
                             } catch (error) {
-                                console.error("Error inserting music into PowerPoint:", error);
                                 showError("Failed to add music to PowerPoint: " + error.message);
                             }
                         } else {
@@ -731,22 +640,19 @@ async function generateImage() {
                         
       // Update token count after successful generation
       if (!isPremium) {
-        console.log("Updating tokens after generation for non-premium user");
         checkTokens();
       }
                     } else {
                         // If music is not ready yet, retry after delay
                         retryCount++;
-                        console.log(`Music not ready yet, retrying (Attempt ${retryCount})...`);
-                        showLoader(`Checking music status... Attempt ${retryCount}`);
+                        showLoader(`Generating music...`);
                         await new Promise(resolve => setTimeout(resolve, retryDelay));
                         return checkMusicStatus();
                     }
                 } catch (error) {
                     // If error occurs, retry after delay
                     retryCount++;
-                    console.log(`Error checking music status, retrying (Attempt ${retryCount})...`, error);
-                    showLoader(`Retrying music status check... Attempt ${retryCount}`);
+                    showLoader(`Generating music...`);
                     await new Promise(resolve => setTimeout(resolve, retryDelay));
                     return checkMusicStatus();
                 }
@@ -755,13 +661,10 @@ async function generateImage() {
             // Start checking music status
             await checkMusicStatus();
     } else {
-      hideLoader();
-            console.error("Invalid API response:", data);
             const errorMsg = data.msg || data.message || "Failed to generate music. Please try again.";
       showError(errorMsg);
         }
     } catch (error) {
-        console.error("Error in music generation:", error);
         hideLoader();
         showError(error.message || "Failed to generate music. Please try again.");
     }
@@ -770,11 +673,6 @@ async function generateImage() {
     generateButton.disabled = false;
 
   } catch (error) {
-    console.error("Detailed error in generateImage:", {
-      error: error,
-      message: error.message,
-      stack: error.stack
-    });
     hideLoader();
     
     let errorMessage = "An error occurred while generating the music.";
@@ -802,26 +700,6 @@ async function insertImageToDocument(imageUrl) {
       Office.onReady((info) => {
         try {
           switch (info.host) {
-            case Office.HostType.Word:
-              Word.run(async (context) => {
-                const range = context.document.getSelection();
-                range.insertInlinePictureFromBase64(base64Image, "Replace");
-                await context.sync();
-                resolve();
-              });
-              break;
-              
-            case Office.HostType.Excel:
-              Excel.run(async (context) => {
-                const range = context.workbook.getSelectedRange();
-                const shape = range.worksheet.shapes.addImage(base64Image);
-                shape.width = 300; // Set default width
-                shape.height = 300; // Set default height
-                await context.sync();
-                resolve();
-              });
-              break;
-              
             case Office.HostType.PowerPoint:
               // Use setSelectedDataAsync for PowerPoint
               Office.context.document.setSelectedDataAsync(base64Image, {
@@ -832,10 +710,8 @@ async function insertImageToDocument(imageUrl) {
                 imageHeight: 300   // Height in points
               }, function(asyncResult) {
                 if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                  console.log('Image inserted successfully in PowerPoint');
                   resolve();
                 } else {
-                  console.error('Failed to insert image in PowerPoint:', asyncResult.error.message);
                   reject(new Error(asyncResult.error.message));
                 }
               });
@@ -850,7 +726,6 @@ async function insertImageToDocument(imageUrl) {
       });
     });
   } catch (error) {
-    console.error("Error inserting image:", error);
     throw error;
   }
 }
@@ -871,14 +746,12 @@ async function createTempFileFromBase64(base64Data) {
     const tempFile = new File([blob], 'temp_image.png', { type: 'image/png' });
     return tempFile;
   } catch (error) {
-    console.error("Error creating temporary file:", error);
     throw error;
   }
 }
 
 async function fetchImageAsBase64(imageUrl) {
   try {
-    console.log("Fetching image from URL:", imageUrl);
     const response = await fetch(imageUrl);
     
     if (!response.ok) {
@@ -897,15 +770,12 @@ async function fetchImageAsBase64(imageUrl) {
             reject(new Error("Failed to get valid base64 data from image"));
             return;
           }
-          console.log("Image successfully converted to base64");
           resolve(base64String);
         } catch (error) {
-          console.error("Error processing base64 data:", error);
           reject(error);
         }
       };
       reader.onerror = (error) => {
-        console.error("Error converting image to base64:", error);
         reject(error);
       };
       reader.readAsDataURL(blob);
@@ -937,11 +807,6 @@ async function enhancePrompt() {
     const formData = new FormData();
     formData.append('music_description', currentPrompt);
 
-    console.log('Sending request to enhance prompt:', {
-      url: "https://shorts.multiplewords.com/mwvideos/api/enhance_prompt",
-      prompt: currentPrompt
-    });
-
     // Make the API call
     const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/enhance_prompt", {
       method: "POST",
@@ -951,21 +816,12 @@ async function enhancePrompt() {
       }
     });
 
-    // Log the raw response
-    console.log('Raw response:', response);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
-      });
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('API Response data:', data);
     
     // Check for enhanced_prompt in different possible locations in the response
     const enhancedPrompt = data.enhanced_prompt || data.data?.enhanced_prompt || data.result?.enhanced_prompt;
@@ -974,12 +830,10 @@ async function enhancePrompt() {
       textarea.value = enhancedPrompt;
       showSuccess("Prompt enhanced successfully!");
     } else {
-      console.error('Unexpected API response format:', data);
       throw new Error("Failed to enhance prompt: No enhanced prompt in response");
     }
 
   } catch (error) {
-    console.error("Error in enhancePrompt:", error);
     showError(`Error enhancing prompt: ${error.message}`);
   } finally {
     // Reset the enhance button state
@@ -1028,18 +882,12 @@ async function getMoreCredits() {
     const initialData = await initialTokenResponse.json();
     const initialTokens = initialData.credits?.videos || 0;
     
-    console.log('Initial state:', {
-      tokens: initialTokens,
-      isPremium: initialPremiumStatus
-    });
-    
     // Show loader with purchase message and set it as not a generation operation
     showLoader("Processing your purchase...", false);
     
     // Open the pricing page in a dialog instead of a new window
     try {
       const result = await authManager.openCreditsDialog(userId);
-      console.log("Credits dialog result:", result);
       
       // Hide the loader after the dialog is closed
       hideLoader();
@@ -1053,13 +901,11 @@ async function getMoreCredits() {
         showNotification("Purchase cancelled or completed.", "info");
       }
     } catch (error) {
-      console.error("Error opening credits dialog:", error);
       showError("Failed to open credits purchase page. Please try again.");
       hideLoader();
       return;
     }
   } catch (error) {
-    console.error("Error in getMoreCredits:", error);
     showError("An error occurred while processing your request. Please try again.");
     hideLoader();
   }
@@ -1092,14 +938,6 @@ function startPurchaseCheck(userId, initialTokens, initialPremiumStatus) {
       const tokenData = await tokenResponse.json();
       const currentTokens = tokenData.credits?.videos || 0;
       
-      console.log('Checking purchase status:', {
-        initialTokens,
-        currentTokens,
-        initialPremiumStatus,
-        newPremiumStatus,
-        tokenDiff: currentTokens - initialTokens
-      });
-      
       // Stop checking if either tokens increased or user became premium
       if (currentTokens > initialTokens || (!initialPremiumStatus && newPremiumStatus)) {
         hasUpdated = true; // Set flag to prevent multiple updates
@@ -1117,7 +955,6 @@ function startPurchaseCheck(userId, initialTokens, initialPremiumStatus) {
         await checkTokens();
       }
     } catch (error) {
-      console.error("Error checking purchase status:", error);
       // Don't stop polling on error, just log it
     }
   }, 3000); // Check every 3 seconds
@@ -1163,7 +1000,6 @@ function showSuccess(message) {
 
 // Handle logout
 function handleLogout() {
-  console.log("Logout button clicked");
   authManager.logout();
   updateAuthUI(false);
   showSuccess("Logged out successfully");
@@ -1177,90 +1013,48 @@ function getDuration() {
 
 // Function to insert music into the document
 async function insertMusicToDocument() {
-    console.log("=== Starting insertMusicToDocument function ===");
     try {
         // Check if Office is initialized
         if (!Office) {
             throw new Error("Office object is not initialized");
         }
-        console.log("Office object is available");
 
         // Get the music player and URL
         const player = document.getElementById('music-player');
-        console.log("Music player element found:", !!player);
         
         if (!player) {
             throw new Error("Music player element not found");
         }
 
         const musicUrl = player.src;
-        console.log("Music URL:", musicUrl);
         
         if (!musicUrl) {
-            console.error("No music URL available in player");
             showError("No music available to insert");
             return;
         }
 
         // Show loading state
-        console.log("Showing loader for music insertion");
         showLoader("Inserting music into document...");
 
         // Wait for Office to be ready
-        console.log("Waiting for Office to be ready");
         await Office.onReady();
-        
-        console.log("Current Office host:", Office.context.host);
         
         // Handle different Office applications
         switch (Office.context.host) {
-            case Office.HostType.Word:
-                console.log("Inserting into Word document");
-                try {
-                    await Word.run(async (context) => {
-                        console.log("Word.run context created");
-                        const range = context.document.getSelection();
-                        console.log("Got document selection");
-                        
-                        const paragraph = range.insertParagraph("", "After");
-                        console.log("Created new paragraph");
-                        
-                        console.log("Inserting HTML with audio link");
-                        paragraph.insertHtml(
-                            `<p>🎵 Audio: <a href="${musicUrl}" target="_blank">Click to play</a></p>`,
-                            "Replace"
-                        );
-                        
-                        console.log("Syncing changes to Word");
-                        await context.sync();
-                        console.log("Word document updated successfully");
-                    });
-                } catch (wordError) {
-                    console.error("Word-specific error:", wordError);
-                    throw new Error(`Failed to insert into Word: ${wordError.message}`);
-                }
-                break;
-
             case Office.HostType.PowerPoint:
-                console.log("Inserting into PowerPoint presentation");
                 try {
                     // First, fetch the audio file
-                    console.log("Fetching audio file from URL:", musicUrl);
                     const response = await fetch(musicUrl);
                     if (!response.ok) {
                         throw new Error(`Failed to fetch audio: ${response.status}`);
                     }
                     const audioBlob = await response.blob();
-                    console.log("Audio blob created:", audioBlob);
 
                     // Convert blob to base64
                     const audioBase64 = await blobToBase64(audioBlob);
-                    console.log("Audio converted to base64");
 
                     // Use PowerPoint.run for better error handling
                     await PowerPoint.run(async (context) => {
-                        console.log("PowerPoint.run context created");
-                        
                         // Get current slide
                         const slides = context.presentation.getSelectedSlides();
                         slides.load("items");
@@ -1268,21 +1062,17 @@ async function insertMusicToDocument() {
                         
                         let currentSlide;
                         if (slides.items.length === 0) {
-                            console.log("No slide selected, creating new slide");
                             currentSlide = context.presentation.slides.add();
                         } else {
                             currentSlide = slides.items[0];
-                            console.log("Using selected slide");
                         }
 
                         // Add title
-                        console.log("Adding title to slide");
                         const titleShape = currentSlide.shapes.addTextBox("Generated Music", 100, 50, 500, 50);
                         titleShape.textFrame.textRange.font.size = 32;
                         titleShape.textFrame.textRange.font.bold = true;
 
                         // Insert audio using the correct method
-                        console.log("Inserting audio into slide");
                         try {
                             // Create a shape for the audio
                             const audioShape = currentSlide.shapes.addMedia(
@@ -1294,18 +1084,11 @@ async function insertMusicToDocument() {
                                     height: 50
                                 }
                             );
-                            console.log("Audio shape created successfully");
-
-                            // Set the media type
-                            audioShape.mediaType = "audio";
-                            console.log("Media type set to audio");
                         } catch (mediaError) {
-                            console.error("Error creating audio shape:", mediaError);
                             throw new Error(`Failed to create audio shape: ${mediaError.message}`);
                         }
 
                         // Add instructions
-                        console.log("Adding instructions text");
                         const instructionsShape = currentSlide.shapes.addTextBox(
                             "Click the speaker icon above to play/pause the music",
                             100, 400, 500, 30
@@ -1313,34 +1096,25 @@ async function insertMusicToDocument() {
                         instructionsShape.textFrame.textRange.font.color = "#666666";
                         instructionsShape.textFrame.textRange.font.italic = true;
 
-                        console.log("Syncing changes to PowerPoint");
                         await context.sync();
-                        console.log("PowerPoint slide updated successfully");
                     });
                 } catch (pptError) {
-                    console.error("PowerPoint-specific error:", pptError);
                     throw new Error(`Failed to insert into PowerPoint: ${pptError.message}`);
                 }
                 break;
 
             default:
-                console.error("Unsupported Office application:", Office.context.host);
                 throw new Error("This Office application is not supported for music insertion");
         }
 
-        console.log("Hiding loader after successful insertion");
         hideLoader();
         showSuccess("Music inserted successfully!");
-        console.log("=== insertMusicToDocument completed successfully ===");
     } catch (error) {
-        console.error("Error in insertMusicToDocument:", error);
-        console.error("Error stack:", error.stack);
         hideLoader();
         showError("Failed to insert music: " + error.message);
     }
 }
 
-// Add the download function
 async function downloadGeneratedMusic() {
     try {
         const player = document.getElementById('music-player');
@@ -1383,7 +1157,6 @@ async function downloadGeneratedMusic() {
         hideLoader();
         showSuccess("Music download started!");
     } catch (error) {
-        console.error("Error downloading music:", error);
         hideLoader();
         showError("Failed to download music: " + error.message);
     }
@@ -1438,9 +1211,8 @@ async function insertAudioIntoSlide(audioBlob, audioName = "Generated Audio") {
             titleShape.textFrame.textRange.font.bold = true;
             
             // Insert audio shape
-            const audioShape = currentSlide.shapes.addMediaFromBase64(
+            const audioShape = currentSlide.shapes.addMedia(
                 audioBase64,
-                PowerPoint.MediaType.audio,
                 {
                     left: 100,    // X position
                     top: 300,     // Y position  
@@ -1450,6 +1222,7 @@ async function insertAudioIntoSlide(audioBlob, audioName = "Generated Audio") {
             );
             
             // Set audio properties
+            audioShape.mediaType = "audio";
             audioShape.name = audioName;
             
             // Add instructions text
@@ -1466,7 +1239,6 @@ async function insertAudioIntoSlide(audioBlob, audioName = "Generated Audio") {
         
         showSuccess("Music added to slide successfully!");
     } catch (error) {
-        console.error("Error inserting audio:", error);
         showError("Failed to add music to PowerPoint: " + error.message);
         throw error;
     }
