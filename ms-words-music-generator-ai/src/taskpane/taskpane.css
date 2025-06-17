@@ -16,7 +16,12 @@
      /* Ensure body fills height for flex alignment */
      display: flex;
      flex-direction: column;
-     overflow: hidden;
+     /* Enable vertical scrolling */
+     overflow-y: auto;
+     /* Hide horizontal scrollbar */
+     overflow-x: hidden;
+     /* Set minimum height for the taskpane */
+     min-height: 800px;
  }
  
  ul {
@@ -34,6 +39,10 @@
     flex-shrink: 0;
     margin-bottom: 0;
     border-bottom: 1px solid #EDEBE9;
+    /* Keep header fixed at top */
+    position: sticky;
+    top: 0;
+    z-index: 100;
  }
 
  .header-top {
@@ -91,6 +100,12 @@
     box-sizing: border-box;
     flex: 1;
     position: relative;
+    /* Enable vertical scrolling */
+    overflow-y: auto;
+    /* Add smooth scrolling */
+    scroll-behavior: smooth;
+    /* Set minimum height for the main content area */
+    min-height: 700px;
  }
 
  .input-wrapper {
@@ -744,4 +759,79 @@ textarea.input-field::placeholder {
 #duration-input:focus {
     border-color: #0078D4;
     outline: none;
+}
+
+/* Customize scrollbar appearance */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+/* Generated Music Player Styles */
+#music-player-container {
+    background-color: #FFFFFF;
+    border: 1px solid #EDEBE9;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-top: 20px;
+    /* Remove display: block !important; to allow JS to control visibility */
+    box-sizing: border-box;
+}
+
+#music-player {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    outline: none;
+}
+
+#download-music {
+    /* Inherit basic button styles from Fluent UI */
+    background-color: #0078D4;
+    color: #FFFFFF;
+    border: 1px solid #0078D4;
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    margin-top: 12px;
+    margin-left: 0; /* Remove left margin to make it full width if alone, or align left */
+    width: auto; /* Adjust width as needed, or set to 100% */
+}
+
+#download-music:hover {
+    background-color: #005A9E;
+    border-color: #005A9E;
+}
+
+#download-music:active {
+    background-color: #004578;
+    border-color: #004578;
+}
+
+#download-music .ms-Button-label {
+    color: inherit;
 }

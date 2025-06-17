@@ -32,7 +32,7 @@ Office.onReady((info) => {
     document.getElementById("get-more-credits").onclick = getMoreCredits;
     document.getElementById("cancel-generation").onclick = cancelGeneration;
     document.getElementById("logoutButton").onclick = handleLogout;
-    document.getElementById("insert-music").onclick = insertMusicToDocument;
+    document.getElementById("download-music").onclick = downloadGeneratedMusic;
 
     // Set up duration slider
     const durationSlider = document.getElementById("duration-slider");
@@ -594,7 +594,7 @@ async function generateImage() {
 
     // Log the request
     console.log("Music generation request:", {
-        user_id: userId,
+      user_id: userId,
         music_category_id: categorySelect.value,
         music_description: promptText,
         music_name: promptText.substring(0, 50),
@@ -605,24 +605,24 @@ async function generateImage() {
 
     try {
         const response = await fetch("https://shorts.multiplewords.com/mwvideos/api/music_prompt", {
-            method: "POST",
+      method: "POST",
             body: musicFormData,
-            signal: currentGenerationController.signal
-        });
+      signal: currentGenerationController.signal
+    });
 
         console.log("Music generation response status:", response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-        const data = await response.json();
+    const data = await response.json();
         console.log("Music generation response:", data);
 
         if (data.status === 1 && data.music_id) {
             console.log("Successfully received music ID:", data.music_id);
             
-            // Update loader message
+      // Update loader message
             showLoader("Checking music generation status...");
             
             // Add retry logic for checking music status - infinite retries
@@ -697,87 +697,28 @@ async function generateImage() {
                         
                         console.log("Music details:", musicDetails);
 
+                        // === Show and update the music player UI ===
+                        const playerContainer = document.getElementById('music-player-container');
+                        const player = document.getElementById('music-player');
+                        if (player && playerContainer) {
+                            player.src = musicDetails.url;
+                            playerContainer.style.display = 'block';
+                        }
+                        // === End music player UI update ===
+
                         // Insert music into PowerPoint
                         if (Office.context.host === Office.HostType.PowerPoint) {
                             try {
-                                // Add a new slide
-                                await PowerPoint.run(async (context) => {
-                                    const presentation = context.presentation;
-                                    const newSlide = presentation.slides.add();
-                                    
-                                    // Sync to ensure slide is created
-                                    await context.sync();
-                                    
-                                    // Add a title
-                                    const titleShape = newSlide.shapes.addTextBox("Generated Music", 100, 50, 500, 50);
-                                    titleShape.textFrame.textRange.font.size = 32;
-                                    titleShape.textFrame.textRange.font.bold = true;
-                                    
-                                    // Add music details
-                                    const detailsShape = newSlide.shapes.addTextBox(
-                                        `🎵 Name: ${musicDetails.name}\n` +
-                                        `Category: ${musicDetails.category}\n` +
-                                        `Duration: ${musicDetails.duration} seconds`,
-                                        100, 150, 500, 100
-                                    );
-
-                                    // Sync to ensure shapes are added
-                                    await context.sync();
-
-                                    // Insert audio using direct media insertion
-                                    return new Promise((resolve, reject) => {
-                                        // First ensure we're on the right slide
-                                        newSlide.load("id");
-                                        context.sync().then(() => {
-                                            // Select the slide where we want to insert the audio
-                                            Office.context.document.setSelectedDataAsync(
-                                                newSlide.id,
-                                                { coercionType: "SlideRange" },
-                                                (result) => {
-                                                    if (result.status === Office.AsyncResultStatus.Failed) {
-                                                        reject(new Error("Failed to select slide: " + result.error.message));
-                                                        return;
-                                                    }
-
-                                                    // Now insert the audio file
-                                                    const mediaData = {
-                                                        mediaType: "audio",
-                                                        fileName: musicDetails.name + ".mp3",
-                                                        url: musicDetails.url,
-                                                        autoPlay: false
-                                                    };
-
-                                                    Office.context.document.setSelectedDataAsync(
-                                                        mediaData,
-                                                        { coercionType: "Media" },
-                                                        async (mediaResult) => {
-                                                            if (mediaResult.status === Office.AsyncResultStatus.Failed) {
-                                                                reject(new Error("Failed to insert audio: " + mediaResult.error.message));
-                                                            } else {
-                                                                try {
-                                                                    // Add instructions text
-                                                                    const instructionsShape = newSlide.shapes.addTextBox(
-                                                                        "Click the speaker icon above to play/pause the music",
-                                                                        100, 400, 500, 30
-                                                                    );
-                                                                    instructionsShape.textFrame.textRange.font.color = "#666666";
-                                                                    instructionsShape.textFrame.textRange.font.italic = true;
-                                                                    
-                                                                    await context.sync();
-                                                                    resolve();
-                                                                } catch (error) {
-                                                                    reject(error);
-                                                                }
-                                                            }
-                                                        }
-                                                    );
-                                                }
-                                            );
-                                        }).catch(reject);
-                                    });
-                                });
+                                // Fetch the audio as blob
+                                const audioBlob = await fetchAudioAsBlob(queueData.music.music_url);
                                 
-                                showSuccess("Music added to new slide successfully!");
+                                // Insert the audio into the slide
+                                await insertAudioIntoSlide(
+                                    audioBlob,
+                                    musicDetails.name || "Generated Music"
+                                );
+                                
+                                showSuccess("Music added to slide successfully!");
                             } catch (error) {
                                 console.error("Error inserting music into PowerPoint:", error);
                                 showError("Failed to add music to PowerPoint: " + error.message);
@@ -786,13 +727,13 @@ async function generateImage() {
                             showError("This feature is only available in PowerPoint");
                         }
                         
-                        hideLoader();
+      hideLoader();
                         
-                        // Update token count after successful generation
-                        if (!isPremium) {
-                            console.log("Updating tokens after generation for non-premium user");
-                            checkTokens();
-                        }
+      // Update token count after successful generation
+      if (!isPremium) {
+        console.log("Updating tokens after generation for non-premium user");
+        checkTokens();
+      }
                     } else {
                         // If music is not ready yet, retry after delay
                         retryCount++;
@@ -813,11 +754,11 @@ async function generateImage() {
 
             // Start checking music status
             await checkMusicStatus();
-        } else {
-            hideLoader();
+    } else {
+      hideLoader();
             console.error("Invalid API response:", data);
             const errorMsg = data.msg || data.message || "Failed to generate music. Please try again.";
-            showError(errorMsg);
+      showError(errorMsg);
         }
     } catch (error) {
         console.error("Error in music generation:", error);
@@ -1236,66 +1177,297 @@ function getDuration() {
 
 // Function to insert music into the document
 async function insertMusicToDocument() {
+    console.log("=== Starting insertMusicToDocument function ===");
+    try {
+        // Check if Office is initialized
+        if (!Office) {
+            throw new Error("Office object is not initialized");
+        }
+        console.log("Office object is available");
+
+        // Get the music player and URL
+        const player = document.getElementById('music-player');
+        console.log("Music player element found:", !!player);
+        
+        if (!player) {
+            throw new Error("Music player element not found");
+        }
+
+        const musicUrl = player.src;
+        console.log("Music URL:", musicUrl);
+        
+        if (!musicUrl) {
+            console.error("No music URL available in player");
+            showError("No music available to insert");
+            return;
+        }
+
+        // Show loading state
+        console.log("Showing loader for music insertion");
+        showLoader("Inserting music into document...");
+
+        // Wait for Office to be ready
+        console.log("Waiting for Office to be ready");
+        await Office.onReady();
+        
+        console.log("Current Office host:", Office.context.host);
+        
+        // Handle different Office applications
+        switch (Office.context.host) {
+            case Office.HostType.Word:
+                console.log("Inserting into Word document");
+                try {
+                    await Word.run(async (context) => {
+                        console.log("Word.run context created");
+                        const range = context.document.getSelection();
+                        console.log("Got document selection");
+                        
+                        const paragraph = range.insertParagraph("", "After");
+                        console.log("Created new paragraph");
+                        
+                        console.log("Inserting HTML with audio link");
+                        paragraph.insertHtml(
+                            `<p>🎵 Audio: <a href="${musicUrl}" target="_blank">Click to play</a></p>`,
+                            "Replace"
+                        );
+                        
+                        console.log("Syncing changes to Word");
+                        await context.sync();
+                        console.log("Word document updated successfully");
+                    });
+                } catch (wordError) {
+                    console.error("Word-specific error:", wordError);
+                    throw new Error(`Failed to insert into Word: ${wordError.message}`);
+                }
+                break;
+
+            case Office.HostType.PowerPoint:
+                console.log("Inserting into PowerPoint presentation");
+                try {
+                    // First, fetch the audio file
+                    console.log("Fetching audio file from URL:", musicUrl);
+                    const response = await fetch(musicUrl);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch audio: ${response.status}`);
+                    }
+                    const audioBlob = await response.blob();
+                    console.log("Audio blob created:", audioBlob);
+
+                    // Convert blob to base64
+                    const audioBase64 = await blobToBase64(audioBlob);
+                    console.log("Audio converted to base64");
+
+                    // Use PowerPoint.run for better error handling
+                    await PowerPoint.run(async (context) => {
+                        console.log("PowerPoint.run context created");
+                        
+                        // Get current slide
+                        const slides = context.presentation.getSelectedSlides();
+                        slides.load("items");
+                        await context.sync();
+                        
+                        let currentSlide;
+                        if (slides.items.length === 0) {
+                            console.log("No slide selected, creating new slide");
+                            currentSlide = context.presentation.slides.add();
+                        } else {
+                            currentSlide = slides.items[0];
+                            console.log("Using selected slide");
+                        }
+
+                        // Add title
+                        console.log("Adding title to slide");
+                        const titleShape = currentSlide.shapes.addTextBox("Generated Music", 100, 50, 500, 50);
+                        titleShape.textFrame.textRange.font.size = 32;
+                        titleShape.textFrame.textRange.font.bold = true;
+
+                        // Insert audio using the correct method
+                        console.log("Inserting audio into slide");
+                        try {
+                            // Create a shape for the audio
+                            const audioShape = currentSlide.shapes.addMedia(
+                                audioBase64,
+                                {
+                                    left: 100,
+                                    top: 300,
+                                    width: 200,
+                                    height: 50
+                                }
+                            );
+                            console.log("Audio shape created successfully");
+
+                            // Set the media type
+                            audioShape.mediaType = "audio";
+                            console.log("Media type set to audio");
+                        } catch (mediaError) {
+                            console.error("Error creating audio shape:", mediaError);
+                            throw new Error(`Failed to create audio shape: ${mediaError.message}`);
+                        }
+
+                        // Add instructions
+                        console.log("Adding instructions text");
+                        const instructionsShape = currentSlide.shapes.addTextBox(
+                            "Click the speaker icon above to play/pause the music",
+                            100, 400, 500, 30
+                        );
+                        instructionsShape.textFrame.textRange.font.color = "#666666";
+                        instructionsShape.textFrame.textRange.font.italic = true;
+
+                        console.log("Syncing changes to PowerPoint");
+                        await context.sync();
+                        console.log("PowerPoint slide updated successfully");
+                    });
+                } catch (pptError) {
+                    console.error("PowerPoint-specific error:", pptError);
+                    throw new Error(`Failed to insert into PowerPoint: ${pptError.message}`);
+                }
+                break;
+
+            default:
+                console.error("Unsupported Office application:", Office.context.host);
+                throw new Error("This Office application is not supported for music insertion");
+        }
+
+        console.log("Hiding loader after successful insertion");
+        hideLoader();
+        showSuccess("Music inserted successfully!");
+        console.log("=== insertMusicToDocument completed successfully ===");
+    } catch (error) {
+        console.error("Error in insertMusicToDocument:", error);
+        console.error("Error stack:", error.stack);
+        hideLoader();
+        showError("Failed to insert music: " + error.message);
+    }
+}
+
+// Add the download function
+async function downloadGeneratedMusic() {
     try {
         const player = document.getElementById('music-player');
         const musicUrl = player.src;
         
         if (!musicUrl) {
-            showError("No music available to insert");
+            showError("No music available to download");
             return;
         }
 
-        showLoader("Inserting music into document...");
+        showLoader("Preparing music for download...");
 
-        await Office.onReady();
-        
-        // Handle different Office applications
-        switch (Office.context.host) {
-            case Office.HostType.Word:
-                await Word.run(async (context) => {
-                    const range = context.document.getSelection();
-                    const paragraph = range.insertParagraph("", "After");
-                    
-                    // Insert an audio icon or placeholder
-                    paragraph.insertHtml(
-                        `<p>🎵 Audio: <a href="${musicUrl}" target="_blank">Click to play</a></p>`,
-                        "Replace"
-                    );
-                    
-                    await context.sync();
-                });
-                break;
-
-            case Office.HostType.PowerPoint:
-                // For PowerPoint, we'll add a shape with a link
-                const audioShape = {
-                    type: "Text",
-                    text: "🎵 Click to play audio",
-                    hyperlink: musicUrl,
-                    width: 200,
-                    height: 50
-                };
-                
-                Office.context.document.setSelectedDataAsync(
-                    audioShape,
-                    { coercionType: Office.CoercionType.Text },
-                    (result) => {
-                        if (result.status === Office.AsyncResultStatus.Failed) {
-                            throw new Error(result.error.message);
-                        }
-                    }
-                );
-                break;
-
-            default:
-                throw new Error("This Office application is not supported for music insertion");
+        // Fetch the audio file
+        const response = await fetch(musicUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch audio: ${response.status}`);
         }
 
+        // Get the audio data as a blob
+        const audioBlob = await response.blob();
+
+        // Create a URL for the blob
+        const url = URL.createObjectURL(audioBlob);
+
+        // Create a temporary link element
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'generated_music.mp3'; // Set the download filename
+
+        // Append to body (required for Firefox)
+        document.body.appendChild(a);
+
+        // Trigger the download
+        a.click();
+
+        // Clean up
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
         hideLoader();
-        showSuccess("Music inserted successfully!");
+        showSuccess("Music download started!");
     } catch (error) {
-        console.error("Error inserting music:", error);
+        console.error("Error downloading music:", error);
         hideLoader();
-        showError("Failed to insert music: " + error.message);
+        showError("Failed to download music: " + error.message);
+    }
+}
+
+// Helper function to convert blob to base64
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // Remove data URL prefix (data:audio/mp3;base64,)
+            const base64 = reader.result.split(',')[1];
+            resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+// Helper: Fetch audio from URL as blob
+async function fetchAudioAsBlob(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch audio: ${response.statusText}`);
+    }
+    return await response.blob();
+}
+
+// Main function to insert audio into PowerPoint slide
+async function insertAudioIntoSlide(audioBlob, audioName = "Generated Audio") {
+    try {
+        // Convert blob to base64
+        const audioBase64 = await blobToBase64(audioBlob);
+        
+        await PowerPoint.run(async (context) => {
+            // Get current slide or create new one
+            let currentSlide;
+            const slides = context.presentation.getSelectedSlides();
+            slides.load("items");
+            await context.sync();
+            
+            if (slides.items.length === 0) {
+                // No slide selected, create a new one
+                currentSlide = context.presentation.slides.add();
+            } else {
+                currentSlide = slides.items[0];
+            }
+            
+            // Add title to the slide
+            const titleShape = currentSlide.shapes.addTextBox("Generated Music", 100, 50, 500, 50);
+            titleShape.textFrame.textRange.font.size = 32;
+            titleShape.textFrame.textRange.font.bold = true;
+            
+            // Insert audio shape
+            const audioShape = currentSlide.shapes.addMediaFromBase64(
+                audioBase64,
+                PowerPoint.MediaType.audio,
+                {
+                    left: 100,    // X position
+                    top: 300,     // Y position  
+                    width: 200,   // Width of audio control
+                    height: 50    // Height of audio control
+                }
+            );
+            
+            // Set audio properties
+            audioShape.name = audioName;
+            
+            // Add instructions text
+            const instructionsShape = currentSlide.shapes.addTextBox(
+                "Click the speaker icon above to play/pause the music",
+                100, 400, 500, 30
+            );
+            instructionsShape.textFrame.textRange.font.color = "#666666";
+            instructionsShape.textFrame.textRange.font.italic = true;
+            
+            await context.sync();
+            return audioShape;
+        });
+        
+        showSuccess("Music added to slide successfully!");
+    } catch (error) {
+        console.error("Error inserting audio:", error);
+        showError("Failed to add music to PowerPoint: " + error.message);
+        throw error;
     }
 }
