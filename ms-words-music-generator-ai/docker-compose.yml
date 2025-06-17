@@ -1,4 +1,4 @@
-version: "1"
+version: "3"
 services:
   www:
     image: nginx:alpine
@@ -6,16 +6,15 @@ services:
       - ./dist:/usr/share/nginx/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     environment:
-      - VIRTUAL_HOST=ms-words-music-generator.saifs.ai
+      - VIRTUAL_HOST=ms-ai-image-generator.saifs.ai
       - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=ms-words-music-generator.saifs.ai
+      - LETSENCRYPT_HOST=ms-ai-image-generator.saifs.ai
       - LETSENCRYPT_EMAIL=multiple.words.one@gmail.com
       - NODE_ENV=production
     networks:
       - default
     expose:
       - 80
-
 
 networks:
   default:
