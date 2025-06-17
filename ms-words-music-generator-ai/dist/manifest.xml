@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
-  <Id>d5307d8b-4cf7-402c-a4d5-6c2d270bf301</Id>
+  <Id>4d846b9c-743b-4d67-9507-b97246958066</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>Saifs AI</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Image Editor"/>
   <Description DefaultValue="AI-powered image editor for Windows Office applications."/>
-  <IconUrl DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/image-editor-ai-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/image-editor-ai-64.png"/>
+  <IconUrl DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/music-icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/music-icon-64.png"/>
   <SupportUrl DefaultValue="https://saifytech.com/contact-us"/>
   <AppDomains>
     <AppDomain>https://saifytech.com</AppDomain>
@@ -79,9 +79,9 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/image-editor-ai-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/image-editor-ai-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/image-editor-ai-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/music-icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/music-icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://multiplewords.nyc3.cdn.digitaloceanspaces.com/general_assets/music-icon-80.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
