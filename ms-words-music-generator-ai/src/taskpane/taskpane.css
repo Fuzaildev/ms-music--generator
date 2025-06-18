@@ -1,0 +1,837 @@
+/* 
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+ html,
+ body {
+     width: 100%;
+     height: 100%;
+     margin: 0;
+     padding: 0;
+     font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+     background: #FFFFFF; 
+     /* Ensure default text color is dark */
+     color: #323130; 
+     /* Ensure body fills height for flex alignment */
+     display: flex;
+     flex-direction: column;
+     /* Enable vertical scrolling */
+     overflow-y: auto;
+     /* Hide horizontal scrollbar */
+     overflow-x: hidden;
+     /* Set minimum height for the taskpane */
+     min-height: 800px;
+ }
+ 
+ ul {
+     margin: 0;
+     padding: 0;
+ }
+ 
+ .ms-welcome__header {
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: #ffffff;
+    color: #323130;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid #EDEBE9;
+    /* Keep header fixed at top */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+ }
+
+ .header-top {
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+ }
+
+ .header-top h1 {
+    margin: 0;
+ }
+
+ .ms-welcome__header h1 {
+    /* Slightly smaller, standard weight */
+    font-size: 24px; 
+    line-height: 1.2;
+    font-weight: 600; /* Semibold */
+    color: #1f4e7a; /* Use a Fluent UI theme color */
+    text-align: left;
+    max-width: 100%; /* Allow full width */
+ }
+
+ .ms-welcome__header p {
+    margin: 4px 0;
+    font-size: 14px; 
+    line-height: 1.5;
+    color: #605E5C; 
+    text-align: left;
+    max-width: 100%;
+    /* Add a little space above the paragraph */
+    margin-top: 4px;
+ }
+
+ #auth-status {
+    display: none;
+ }
+
+ #auth-status.authenticated {
+    display: none;
+ }
+
+ #auth-status.not-authenticated {
+    display: none;
+ }
+
+ .ms-welcome__main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 24px 80px 24px; /* Added bottom padding to account for footer */
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    position: relative;
+    /* Enable vertical scrolling */
+    overflow-y: auto;
+    /* Add smooth scrolling */
+    scroll-behavior: smooth;
+    /* Set minimum height for the main content area */
+    min-height: 700px;
+ }
+
+ .input-wrapper {
+    width: 100%;
+    position: relative;
+    margin-bottom: 16px;
+ }
+
+ /* Combined styles for textarea and input */
+ .input-field {
+    width: 100%;
+    min-height: 80px;
+    max-height: 120px;
+    resize: none;
+    /* Adjusted padding */
+    padding: 8px 12px; 
+    font-size: 14px;
+    /* Standard Fluent UI input border */
+    border: 1px solid #C8C6C4; 
+    /* Subtle border radius */
+    border-radius: 2px; 
+    background: #FFFFFF;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    box-shadow: none; 
+ }
+ 
+ /* Specific style for textarea */
+ textarea.input-field {
+    /* Ensure consistent line height */
+    line-height: 1.5;
+    /* Allow vertical resize, prevent horizontal */
+    resize: vertical;
+    min-height: 60px; /* Minimum height */
+ }
+ 
+ .input-field:focus {
+    outline: none;
+    /* Fluent UI focus border color */
+    border-color: #0078D4; 
+    /* Remove box-shadow, rely on border */
+    box-shadow: none; 
+ }
+ 
+ .enhance-button {
+    position: absolute;
+    right: 4px;
+    /* Position relative to the top of the textarea */
+    top: 4px; 
+    transform: none; /* Remove vertical centering */
+    background: #FFFFFF;
+    border: 1px solid #C8C6C4; 
+    border-radius: 2px;
+    padding: 4px 8px;
+    color: #323130;
+    font-size: 12px;
+    font-weight: 400; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+ }
+
+ .enhance-button:hover {
+    background: #F3F4F6;
+    border-color: #A19F9D; /* Darker neutral border on hover */
+ }
+ 
+ #run.ms-welcome__action.ms-Button--hero {
+    width: 100%;
+    padding: 8px 12px;
+    margin: 8px 0 16px 0;
+    border-radius: 2px;
+    background: #0078D4;
+    border: 1px solid #0078D4;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+ }
+
+#run.ms-Button--hero .ms-Button-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1;
+    display: block;
+    pointer-events: none;
+}
+
+.ms-Button.ms-Button--hero:hover {
+    /* Standard Fluent UI hover blue */
+    background: #005A9E; 
+    border-color: #005A9E;
+    /* Remove transform/shadow for standard feel */
+    transform: none; 
+    box-shadow: none; 
+}
+
+.ms-Button.ms-Button--hero.disabled {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.ms-Button.ms-Button--hero.disabled:hover {
+    background: #F3F2F1;
+    border-color: #C8C6C4;
+}
+
+.ms-Button.ms-Button--hero.disabled .ms-Button-label {
+    color: #A19F9D;
+}
+
+#sideload-msg {
+    display: none;
+}
+
+.ms-welcome__features {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.ms-welcome__features.ms-List .ms-ListItem {
+    /* Use lighter background, subtle border */
+    background: #F3F4F6; 
+    border-radius: 2px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #EDEBE9;
+    /* Remove box-shadow for flatter look */
+    box-shadow: none; 
+}
+
+b {
+    font-weight: 600; /* Semibold is standard */
+    color: #323130; /* Standard text */
+}
+/* Styles for the dropdown */
+.dropdown-wrapper {
+   width: 100%;
+   margin-bottom: 12px; 
+}
+
+.dropdown-wrapper .ms-Label {
+   display: block; /* Ensure label is on its own line */
+   margin-bottom: 4px; /* Space between label and select */
+   font-size: 14px;
+   /* Change font-weight to regular */
+   font-weight: 400; 
+   color: #323130; /* Standard text */
+}
+
+.dropdown-field {
+   width: 100%;
+   padding: 8px 12px; /* Match input field */
+   font-size: 14px;
+   /* Change border color to match the button/focus blue */
+   border: 1px solid #0078D4; 
+   border-radius: 8px; /* Rounded corners as per image */
+   background: #FFFFFF;
+   box-sizing: border-box;
+   transition: all 0.2s ease;
+   appearance: none; /* Remove default browser styling */
+   /* Add custom arrow */
+   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23605E5C"><path d="M8 11.314 3.686 7h8.628L8 11.314z"/></svg>');
+   background-repeat: no-repeat;
+   background-position: right 8px center;
+   background-size: 10px;
+   padding-right: 30px; /* Make space for the arrow */
+   /* Ensure dropdown text is dark */
+   color: #323130;
+}
+
+.dropdown-field:focus {
+   outline: none;
+   border-color: #0078D4; /* Match input field focus */
+}
+
+/* Style for placeholder text in textarea */
+textarea.input-field::placeholder {
+    color: #605E5C; /* Use a slightly lighter dark gray for placeholders */
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+    max-width: 80%;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notification.error {
+    background-color: #FDE7E9;
+    color: #D13438;
+    border: 1px solid #F1707B;
+}
+
+.notification.success {
+    background-color: #DFF6DD;
+    color: #107C10;
+    border: 1px solid #9AD29A;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Remove unused styles */
+.ms-Button.ms-Button--credits,
+.ms-Button.ms-Button--credits:hover,
+.ms-Button.ms-Button--credits:active,
+.ms-Button.ms-Button--credits .ms-Button-label,
+.tokens-container,
+.token-count,
+#token-number,
+#token-number.premium {
+    display: none;
+}
+
+/* Loader styles */
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.loader-container.active {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0078D4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loader-text {
+    color: #323130;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* Cancel button styles */
+.ms-Button.ms-Button--danger {
+    background: #D13438;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ms-Button.ms-Button--danger:hover {
+    background: #A4262C;
+}
+
+.ms-Button.ms-Button--danger:active {
+    background: #751D1F;
+}
+
+.ms-Button.ms-Button--danger .ms-Button-label {
+    color: white;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Auth Section Styles - Keeping for reference but not using directly */
+.auth-section {
+    display: none; /* Hide the auth section */
+}
+
+/* --- Auth Section Styles --- */
+.auth-section {
+    display: none; /* Hide the auth section */
+}
+
+#auth-status {
+    margin-bottom: 12px; /* Space between status and buttons */
+    text-align: center;
+}
+
+/* Color for authenticated status */
+#auth-status.authenticated {
+    color: #107C10; /* Fluent UI Success Green */
+}
+
+/* Color for not authenticated status */
+#auth-status.not-authenticated {
+    color: #605E5C; /* Fluent UI Neutral Secondary */
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+/* Improved logout button styles */
+#logoutButton {
+    background: transparent;
+    border: none;
+    color: #323130;
+    cursor: pointer;
+    padding: 4px;
+}
+
+#logoutButton:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.ms-Button-icon {
+    font-size: 20px;
+    color: #323130;
+}
+
+/* Enhanced authentication loading styles */
+.auth-loading-content {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 16px;
+    text-align: center;
+    display: none; /* Hidden by default, shown only during auth */
+}
+
+.auth-loading-step {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.auth-loading-step.active {
+    display: block;
+    opacity: 1;
+}
+
+.auth-loading-step h3 {
+    color: #0078D4;
+    font-size: 16px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.auth-loading-step p {
+    color: #605E5C;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* Progress indicator for auth steps */
+.auth-progress {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+.auth-progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #E1DFDD;
+    margin: 0 5px;
+    transition: background-color 0.3s ease;
+}
+
+.auth-progress-dot.active {
+    background-color: #0078D4;
+}
+
+/* Animation for the spinner during auth */
+.loader-container.active .loader-spinner {
+    border-top-color: #0078D4;
+    border-right-color: #0078D4;
+    border-bottom-color: #0078D4;
+    border-left-color: #0078D4;
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-top-color: rgba(0, 120, 212, 0.2);
+    border-right-color: rgba(0, 120, 212, 0.2);
+    border-bottom-color: rgba(0, 120, 212, 0.2);
+    border-left-color: #0078D4;
+    animation: spin 1s linear infinite;
+}
+
+/* Styles for the credits footer */
+.credits-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #FFFFFF; /* Changed background to white */
+    padding: 12px 24px; /* Increased vertical padding */
+    box-sizing: border-box;
+    z-index: 100;
+    border-top: 1px solid #e1dfdd; /* Existing border */
+}
+
+/* Ensure the main content area doesn't overlap the fixed footer */
+/* Adjust padding-bottom on .ms-welcome__main if needed, though it seems to be handled */
+
+/* Styles for the logout button icon */
+.ms-Button--icon {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.ms-Button--icon:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.ms-Button-icon {
+    font-size: 20px;
+    line-height: 1;
+    color: #323130;
+}
+
+/* Style the container for credits info */
+.credits-display {
+    display: flex; /* Arrange items horizontally */
+    align-items: center; /* Vertically align items in the middle */
+    justify-content: space-between; /* Space out text and button */
+    width: 100%; /* Take full width */
+    font-size: 14px; /* Standard font size */
+    color: #323130; /* Standard text color */
+}
+
+.credits-display span {
+    white-space: nowrap;
+}
+
+/* Make token count slightly bolder */
+#token-display {
+    font-weight: 600;
+}
+
+/* Style the 'Get More Credits' button - more user-friendly */
+#get-more-credits.ms-Button {
+    margin: 0;
+    padding: 4px 10px; /* Slightly more horizontal padding */
+    font-size: 13px; /* Slightly larger */
+    min-width: auto;
+    height: auto;
+    background-color: #FFFFFF; /* White background */
+    border: 1px solid #0078D4; /* Primary blue border */
+    color: #0078D4; /* Primary blue text */
+    border-radius: 4px; /* Slightly rounded corners */
+    box-shadow: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 600; /* Semibold */
+    cursor: pointer;
+}
+
+#get-more-credits.ms-Button:hover {
+    background-color: #EFF6FC; /* Very light blue hover */
+    border-color: #005A9E; /* Darker blue border */
+    color: #005A9E; /* Darker blue text */
+    box-shadow: none;
+}
+
+#get-more-credits.ms-Button:active {
+    background-color: #DEECF9; /* Slightly darker active */
+    border-color: #005A9E;
+    color: #005A9E;
+    box-shadow: none;
+    transform: scale(0.98); /* Subtle click effect */
+}
+
+#get-more-credits.ms-Button .ms-Button-label {
+    /* Label styles are handled directly on the button now */
+    /* font-weight: 400; */ /* Removed - using font-weight on button */
+    color: inherit;
+}
+
+#get-more-credits.ms-Button.disabled,
+#get-more-credits.ms-Button:disabled {
+    background-color: #F3F2F1;
+    border-color: #C8C6C4;
+    color: #A19F9D;
+    cursor: not-allowed;
+}
+
+#get-more-credits.ms-Button.disabled:hover,
+#get-more-credits.ms-Button:disabled:hover {
+    background-color: #F3F2F1;
+    border-color: #C8C6C4;
+    transform: none; /* Remove click effect on disabled */
+}
+
+/* Style for premium token display */
+#token-display.premium {
+    font-weight: 600;
+}
+
+/* Slider styles */
+.slider-wrapper {
+    margin-bottom: 16px;
+    padding: 0 4px;
+}
+
+.slider-wrapper .ms-Label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #323130;
+}
+
+.ms-Slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: #edebe9;
+    outline: none;
+    border-radius: 2px;
+    margin: 10px 0;
+}
+
+.ms-Slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ms-Slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#duration-value {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 14px;
+    color: #323130;
+    font-weight: 600;
+}
+
+/* Duration controls styling */
+.duration-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.ms-Slider {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    background: #edebe9;
+    border-radius: 2px;
+    outline: none;
+}
+
+.ms-Slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ms-Slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #0078D4;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#duration-input {
+    width: 60px;
+    height: 32px;
+    padding: 4px 8px;
+    border: 1px solid #8a8886;
+    border-radius: 2px;
+    font-size: 14px;
+    color: #323130;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+#duration-input::-webkit-outer-spin-button,
+#duration-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#duration-input:focus {
+    border-color: #0078D4;
+    outline: none;
+}
+
+/* Customize scrollbar appearance */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+/* Generated Music Player Styles */
+#music-player-container {
+    background-color: #FFFFFF;
+    border: 1px solid #EDEBE9;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-top: 20px;
+    /* Remove display: block !important; to allow JS to control visibility */
+    box-sizing: border-box;
+}
+
+#music-player {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    outline: none;
+}
+
+#download-music {
+    /* Inherit basic button styles from Fluent UI */
+    background-color: #0078D4;
+    color: #FFFFFF;
+    border: 1px solid #0078D4;
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    margin-top: 12px;
+    margin-left: 0; /* Remove left margin to make it full width if alone, or align left */
+    width: auto; /* Adjust width as needed, or set to 100% */
+}
+
+#download-music:hover {
+    background-color: #005A9E;
+    border-color: #005A9E;
+}
+
+#download-music:active {
+    background-color: #004578;
+    border-color: #004578;
+}
+
+#download-music .ms-Button-label {
+    color: inherit;
+}
